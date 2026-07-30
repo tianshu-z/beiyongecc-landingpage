@@ -13,7 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: baseUrl,
-    title: "北雍文化商业智库",
+    title: {
+      default: "北雍文化商业智库",
+      template: "%s｜北雍文化商业智库",
+    },
     description:
       "以历史为方法、以文明为尺度，以公共判断力与文明参与能力为目标的研究型智库。",
     icons: {
