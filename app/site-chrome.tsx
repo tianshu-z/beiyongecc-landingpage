@@ -17,7 +17,7 @@ export function SiteHeader({ active }: { active?: ActivePage }) {
   return (
     <header className="site-header">
       <a className="brand" href="/" aria-label="返回北雍首页">
-        <img className="brand-logo" src="/assets/ecc-seal.png" alt="" />
+        <img className="brand-logo" src="/assets/印章北大红.svg" alt="" />
         <span>
           北雍文化商业智库
           <small>EURUS CULTURAL COLLECTIVE</small>
@@ -80,20 +80,27 @@ export function PageHero({
   title,
   intro,
 }: {
-  index: string;
-  kicker: string;
+  index?: string;
+  kicker?: string;
   title: string;
   intro: string;
 }) {
+  const hasMeta = Boolean(index && kicker);
+
   return (
-    <section className="page-hero" id="top">
-      <div className="page-hero-index">
-        <span>{index}</span>
-        <i />
-        <span>{kicker}</span>
-      </div>
+    <section
+      className={hasMeta ? "page-hero" : "page-hero page-hero-no-meta"}
+      id="top"
+    >
+      {hasMeta ? (
+        <div className="page-hero-index">
+          <span>{index}</span>
+          <i />
+          <span>{kicker}</span>
+        </div>
+      ) : null}
       <div className="page-hero-copy">
-        <p className="eyebrow">{kicker}</p>
+        {kicker ? <p className="eyebrow">{kicker}</p> : null}
         <h1>{title}</h1>
         <p>{intro}</p>
       </div>
@@ -106,23 +113,68 @@ export function PageHero({
 
 export function SiteFooter() {
   return (
-    <footer className="site-footer">
-      <div className="footer-statement">
-        <p>
-          文明参与者，不只是欣赏文明、谈论文明的人，
-          <br />
-          而是在自己的生活、家庭、组织与公共世界中延续文明的人。
-        </p>
-        <h2>从理解世界，到参与世界。</h2>
-      </div>
-      <div className="footer-brand">
-        <img src="/assets/ecc-seal.png" alt="" />
-        <div>
-          <strong>EURUS</strong>
-          <strong>CULTURAL</strong>
-          <strong>COLLECTIVE</strong>
+    <footer className="site-footer" id="footer">
+      <div className="footer-main">
+        <div className="footer-statement">
+          <p>
+            文明参与者，不只是欣赏文明、谈论文明的人，而是在自己的生活、家庭、组织与公共世界中延续文明的人。
+          </p>
+          <h2>从理解世界，到参与世界。</h2>
+        </div>
+
+        <div className="footer-seal" aria-label="北雍印章">
+          <img src="/assets/印章北大红.svg" alt="" />
+        </div>
+
+        <div className="footer-social">
+          <p className="eyebrow">关注我们 FOLLOW US</p>
+          <div className="footer-qr-grid">
+            <figure>
+              <div
+                aria-label="微信公众号北雍文化二维码"
+                className="footer-qr-image footer-qr-wechat-new"
+                role="img"
+              />
+              <figcaption>公众号<br />北雍文化</figcaption>
+            </figure>
+            <figure>
+              <div
+                aria-label="微信公众号北雍文化商业智库二维码"
+                className="footer-qr-image footer-qr-wechat-old"
+                role="img"
+              />
+              <figcaption>公众号<br />北雍文化商业智库</figcaption>
+            </figure>
+            <figure>
+              <div
+                aria-label="小红书北雍ECC二维码"
+                className="footer-qr-image footer-qr-rednote"
+                role="img"
+              />
+              <figcaption>小红书<br />北雍ECC</figcaption>
+            </figure>
+            <figure>
+              <div
+                aria-label="小宇宙播客北雍ECC二维码"
+                className="footer-qr-image footer-qr-podcast"
+                role="img"
+              />
+              <figcaption>小宇宙播客<br />北雍ECC</figcaption>
+            </figure>
+          </div>
+          <div className="footer-contact">
+            <a href="mailto:team@beiyongecc.org">
+              <span>邮箱 EMAIL</span>
+              <strong>team@beiyongecc.org</strong>
+            </a>
+            <div>
+              <span>微信 WECHAT</span>
+              <strong>eurusccpk</strong>
+            </div>
+          </div>
         </div>
       </div>
+
       <div className="footer-bottom">
         <span>北雍文化商业智库 · 二〇二六年</span>
         <a href="#top">回到顶部 ↑</a>

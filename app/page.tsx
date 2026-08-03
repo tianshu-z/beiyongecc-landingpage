@@ -8,22 +8,25 @@ const portals = [
     text: "认识我们是谁、面对什么问题，以及如何从历史走向现实行动。",
     href: "/about",
     className: "portal-about",
+    image: "/assets/chinese-armillary-sphere-transparent.svg",
   },
   {
     index: "02",
     title: "文章",
     english: "ESSAYS & IDEAS",
-    text: "进入商业史、艺术的背面与科学的神话三条内容线索。",
+    text: "进入商业史与金融史、艺术的B面与生活美学、文明史与制度史、技术文明等内容线索。",
     href: "/essays",
     className: "portal-essays",
+    image: "/assets/ming-bookshelf-transparent-lineart.svg",
   },
   {
     index: "03",
     title: "多媒体",
     english: "VIDEO & PODCAST",
-    text: "观看讲座、沙龙与视频，收听北雍持续展开的声音档案。",
+    text: "观看讲座、沙龙与视频，收听北雍播客。",
     href: "/media",
     className: "portal-media",
+    image: "/assets/bianzhong-transparent-lineart.svg",
   },
   {
     index: "04",
@@ -32,6 +35,7 @@ const portals = [
     text: "关注北雍、发起合作，或成为共同研究与行动的一员。",
     href: "/join",
     className: "portal-join",
+    image: "/assets/zhaozhou-dragon-lockstone-closing-transparent.svg",
   },
 ];
 
@@ -53,8 +57,14 @@ export default function Home() {
           <p className="eyebrow">以历史为方法 · 以文明为尺度</p>
           <img
             className="hero-mark"
-            src="/assets/beiyong-mark.png"
+            src="/assets/北雍两个字北大红.svg"
             alt="北雍"
+          />
+          <img
+            className="hero-seal"
+            src="/assets/印章北大红.svg"
+            alt=""
+            aria-hidden="true"
           />
           <h1>北雍文化商业智库</h1>
           <p className="hero-intro">
@@ -71,14 +81,8 @@ export default function Home() {
         </div>
 
         <div className="hero-corner">
-          <span>ANNO · 2026</span>
           <span>文明研究 · 公共表达 · 教育实践 · 现实项目</span>
         </div>
-
-        <a className="scroll-cue" href="#manifesto" aria-label="向下浏览">
-          <span>SCROLL</span>
-          <i />
-        </a>
       </section>
 
       <section className="manifesto" id="manifesto">
@@ -96,15 +100,11 @@ export default function Home() {
       </section>
 
       <section className="section homepage-portals">
-        <SectionLabel index="EXPLORE">FOUR ENTRANCES</SectionLabel>
         <div className="section-heading heading-split">
           <div>
             <p className="eyebrow">EXPLORE BEIYONG</p>
             <h2>从这里进入北雍</h2>
           </div>
-          <p className="heading-copy lead">
-            每个栏目拥有独立页面与自己的阅读节奏，同时共同回应同一个问题：我们如何理解世界，并参与世界。
-          </p>
         </div>
 
         <div className="portal-grid">
@@ -114,6 +114,13 @@ export default function Home() {
               href={portal.href}
               key={portal.title}
             >
+              <img
+                className="portal-art"
+                src={portal.image}
+                alt=""
+                aria-hidden="true"
+              />
+              <span className="portal-art-tint" aria-hidden="true" />
               <span className="portal-index">{portal.index}</span>
               <div>
                 <small>{portal.english}</small>

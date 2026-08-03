@@ -128,26 +128,120 @@ export const collaborations = [
   },
 ];
 
+export const articleThemes = [
+  "商业史与金融史",
+  "科学社会学与技术文明",
+  "艺术史与生活美学",
+  "文明史、制度史与中国经典",
+  "家庭史、地方史与公共责任",
+] as const;
+
 export const editorial = [
   {
-    category: "商业史",
+    category: "商业史与金融史",
     title: "公司如何成为现代世界的基本组织",
     excerpt:
       "从特许公司、远洋贸易到现代治理，重新理解公司并不只是一种商业工具。",
     className: "commerce",
+    publishedAt: "2026-06-30",
   },
   {
-    category: "艺术的背面",
+    category: "艺术史与生活美学",
     title: "被观看的画，与观看它的人",
     excerpt:
       "艺术的背面，是材料、制度、空间、权力，也是我们观看世界时不曾察觉的习惯。",
     className: "art",
+    publishedAt: "2026-07-14",
   },
   {
-    category: "科学的神话",
+    category: "科学社会学与技术文明",
     title: "从内战到皇家学会：商业都市、公共舆论与实验事实",
     excerpt:
       "科学不仅发生在实验室，也发生在制度、城市、赞助网络与公共判断之中。",
     className: "science",
+    publishedAt: "2026-07-28",
+  },
+];
+
+export const mediaVideos = [
+  {
+    title: "从科尔贝尔到卡西尼：绝对主义国家如何组织科学",
+    series: "科学的神话 · 第二章",
+    publishedAt: "2026-07-26",
+    href: "",
+    visual: "science",
+  },
+  {
+    title: "公司如何成为现代世界的基本组织",
+    series: "商业史与金融史",
+    publishedAt: "2026-07-12",
+    href: "",
+    visual: "commerce",
+  },
+  {
+    title: "观看如何成为一种历史方法",
+    series: "艺术史与生活美学",
+    publishedAt: "2026-06-28",
+    href: "",
+    visual: "art",
+  },
+  {
+    title: "科学事实如何进入公共世界",
+    series: "科学社会学与技术文明",
+    publishedAt: "2026-06-09",
+    href: "",
+    visual: "technology",
+  },
+  {
+    title: "园林、器物与日常注意力",
+    series: "艺术史与生活美学",
+    publishedAt: "2026-05-24",
+    href: "",
+    visual: "classics",
+  },
+  {
+    title: "家庭档案如何成为文明记忆",
+    series: "家庭史、地方史与公共责任",
+    publishedAt: "2026-05-08",
+    href: "",
+    visual: "family",
+  },
+];
+
+export const mediaPodcasts = [
+  {
+    episode: "EP. 005",
+    title: "历史不是答案，而是问题被看见的方式",
+    summary: "从历史坐标出发，讨论判断如何形成，以及我们如何重新看见当下。",
+    publishedAt: "2026-07-30",
+    href: "",
+  },
+  {
+    episode: "EP. 004",
+    title: "公司、信用与现代商业秩序",
+    summary: "公司与信用制度如何共同塑造现代社会的组织方式。",
+    publishedAt: "2026-07-16",
+    href: "",
+  },
+  {
+    episode: "EP. 003",
+    title: "艺术作品的背面有什么",
+    summary: "从材料、制度与观看空间，进入作品未被直接呈现的历史。",
+    publishedAt: "2026-07-02",
+    href: "",
+  },
+  {
+    episode: "EP. 002",
+    title: "技术基础设施如何重塑生活",
+    summary: "把技术放回制度、城市和日常生活，理解它如何改变人的经验。",
+    publishedAt: "2026-06-18",
+    href: "",
+  },
+  {
+    episode: "EP. 001",
+    title: "为什么家庭史值得被保存",
+    summary: "从个人记忆到公共历史，讨论家庭档案能够留下什么。",
+    publishedAt: "2026-06-01",
+    href: "",
   },
 ];

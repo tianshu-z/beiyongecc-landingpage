@@ -7,7 +7,7 @@ import {
   questions,
   themes,
 } from "../content";
-import { PageHero, SectionLabel, SiteFooter, SiteHeader } from "../site-chrome";
+import { PageHero, SiteFooter, SiteHeader } from "../site-chrome";
 
 export const metadata: Metadata = {
   title: "关于北雍",
@@ -20,7 +20,6 @@ export default function AboutPage() {
     <main>
       <SiteHeader active="about" />
       <PageHero
-        index="01"
         kicker="ABOUT BEIYONG"
         title="关于北雍"
         intro="一家以历史、制度与文明研究为基础的人文社会智库。我们从真实问题出发，在历史纵深、制度机制与文明比较中寻找判断与行动的尺度。"
@@ -28,7 +27,6 @@ export default function AboutPage() {
 
       <div id="content">
         <section className="section section-who">
-          <SectionLabel index="02">POSITIONING</SectionLabel>
           <div className="section-heading heading-split">
             <div>
               <p className="eyebrow">WHO WE ARE</p>
@@ -60,7 +58,6 @@ export default function AboutPage() {
         </section>
 
         <section className="section section-questions">
-          <SectionLabel index="05">CORE QUESTIONS</SectionLabel>
           <div className="section-heading">
             <p className="eyebrow">OUR INQUIRY</p>
             <h2>五个核心文明问题</h2>
@@ -80,7 +77,6 @@ export default function AboutPage() {
         </section>
 
         <section className="section section-themes">
-          <SectionLabel index="08">REPRESENTATIVE THEMES</SectionLabel>
           <div className="section-heading heading-light">
             <p className="eyebrow">CURRENT FOCUS</p>
             <h2>当前重点内容方向</h2>
@@ -99,12 +95,11 @@ export default function AboutPage() {
         </section>
 
         <section className="section section-method">
-          <SectionLabel index="09">METHOD</SectionLabel>
           <div className="section-heading method-heading">
             <p className="eyebrow">HOW WE THINK</p>
             <h2>我们的方法</h2>
             <p className="lead">
-              不从“要讲什么知识”开始，而从“什么问题值得被认真面对”开始
+              不从“知识”开始，而从“什么问题值得被认真面对”开始
             </p>
           </div>
 
@@ -122,15 +117,11 @@ export default function AboutPage() {
         </section>
 
         <section className="section section-audience" id="cooperation">
-          <SectionLabel index="10—12">AUDIENCE & COOPERATION</SectionLabel>
           <div className="audience-layout">
             <div className="audience-column">
               <div className="section-heading">
                 <p className="eyebrow">FOR WHOM</p>
                 <h2>我们面向谁</h2>
-                <p className="lead">
-                  公共性面向所有人，深度服务面向需要长期判断与责任能力的个人和组织
-                </p>
               </div>
               <div className="audience-cards">
                 {audiences.map((item) => (
@@ -146,7 +137,6 @@ export default function AboutPage() {
               <div className="section-heading">
                 <p className="eyebrow">WORK WITH US</p>
                 <h2>合作方式</h2>
-                <p className="lead">从一个值得认真面对的问题开始</p>
               </div>
               <p className="cooperation-intro">
                 北雍愿意与研究者、企业、家庭、教育机构、文化机构和公共项目发起者建立长期合作。
@@ -162,7 +152,7 @@ export default function AboutPage() {
                   </article>
                 ))}
               </div>
-              <a className="button button-primary" href="/join">
+              <a className="button button-primary" href="#footer">
                 联系我们
               </a>
             </div>
