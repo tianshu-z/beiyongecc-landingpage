@@ -756,20 +756,20 @@ button {
 }
 
 .portal-join .portal-art {
-  right: -8%;
-  bottom: -38%;
-  width: 62%;
+  right: 2%;
+  bottom: 2%;
+  width: 52%;
   max-width: none;
   height: auto;
 }
 
 .portal-join .portal-art-tint {
-  right: -8%;
-  bottom: -38%;
-  width: 62%;
+  right: 2%;
+  bottom: 2%;
+  width: 52%;
   max-width: none;
   height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 1119.0673 / 536.18811;
 }
 
 .portal-card:focus-visible {
@@ -2172,14 +2172,29 @@ button {
   }
 
   .mobile-menu summary {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
     cursor: pointer;
-    font-size: 13px;
-    letter-spacing: 0.12em;
     list-style: none;
   }
 
   .mobile-menu summary::-webkit-details-marker {
     display: none;
+  }
+
+  .menu-icon {
+    width: 27px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .menu-icon i {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
   }
 
   .mobile-menu nav {
@@ -2470,19 +2485,19 @@ button {
   }
 
   .portal-join .portal-art {
-    right: -5%;
-    bottom: -12%;
-    width: 66%;
+    right: 2%;
+    bottom: 2%;
+    width: 54%;
     height: auto;
   }
 
   .portal-join .portal-art-tint {
-    right: -5%;
-    bottom: -12%;
-    width: 66%;
+    right: 2%;
+    bottom: 2%;
+    width: 54%;
     max-width: none;
     height: auto;
-    aspect-ratio: 1;
+    aspect-ratio: 1119.0673 / 536.18811;
   }
 
   .portal-card > i {

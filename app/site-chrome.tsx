@@ -41,7 +41,13 @@ export function SiteHeader({ active }: { active?: ActivePage }) {
       </a>
 
       <details className="mobile-menu">
-        <summary>菜单</summary>
+        <summary aria-label="打开导航菜单">
+          <span className="menu-icon" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </summary>
         <nav aria-label="移动端导航">
           {navigation.map((item) => (
             <a
