@@ -103,7 +103,7 @@ export function MediaLibrary() {
               </div>
               <div className="media-podcast-copy">
                 <div>
-                  <span>北雍声场</span>
+                  <span>北雍ECC · {podcast.duration}</span>
                   <time dateTime={podcast.publishedAt}>
                     {podcast.publishedAt.replaceAll("-", ".")}
                   </time>

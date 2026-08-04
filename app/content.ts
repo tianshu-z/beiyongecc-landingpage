@@ -211,37 +211,47 @@ export const mediaVideos = [
 export const mediaPodcasts = [
   {
     episode: "EP. 005",
-    title: "历史不是答案，而是问题被看见的方式",
-    summary: "从历史坐标出发，讨论判断如何形成，以及我们如何重新看见当下。",
-    publishedAt: "2026-07-30",
-    href: "",
+    title: "永生工程：从灯塔水母到硅谷大佬的“永生”狂想曲",
+    summary:
+      "从自然界的再生机制、现代抗衰老技术与人体冷冻，讨论技术永生背后的意义、阶层与伦理问题。",
+    publishedAt: "2026-07-07",
+    duration: "142 分钟",
+    href: "https://www.xiaoyuzhoufm.com/episode/6a4c64182e335a35a80f3908",
   },
   {
     episode: "EP. 004",
-    title: "公司、信用与现代商业秩序",
-    summary: "公司与信用制度如何共同塑造现代社会的组织方式。",
-    publishedAt: "2026-07-16",
-    href: "",
+    title: "劳合社（Lloyd's）与海洋文明的金融底层机制",
+    summary:
+      "从伦敦咖啡馆里的船运信息网络出发，追溯海上保险、风险分担与海洋文明背后的制度安排。",
+    publishedAt: "2026-06-07",
+    duration: "108 分钟",
+    href: "https://www.xiaoyuzhoufm.com/episode/6a2551937444b5722234ccd2",
   },
   {
     episode: "EP. 003",
-    title: "艺术作品的背面有什么",
-    summary: "从材料、制度与观看空间，进入作品未被直接呈现的历史。",
-    publishedAt: "2026-07-02",
-    href: "",
+    title: "从斯巴达、克虏伯到拼多多——被雇佣者化身为企业的“冲锋队”",
+    summary:
+      "从工业家长制到数字化管理，分析组织如何通过物质福利、身份认同与制度设计绑定个体。",
+    publishedAt: "2026-05-06",
+    duration: "80 分钟",
+    href: "https://www.xiaoyuzhoufm.com/episode/69fb64dd1b7bd502959c93f8",
   },
   {
     episode: "EP. 002",
-    title: "技术基础设施如何重塑生活",
-    summary: "把技术放回制度、城市和日常生活，理解它如何改变人的经验。",
-    publishedAt: "2026-06-18",
-    href: "",
+    title: "“会员制仓储超市”背后的英国工人运动底色",
+    summary:
+      "从罗奇代尔公平先锋社到 Costco 与山姆，梳理合作社、工人互助和会员制零售之间的历史联系。",
+    publishedAt: "2026-04-22",
+    duration: "84 分钟",
+    href: "https://www.xiaoyuzhoufm.com/episode/69e947801e94ae6921ecee5b",
   },
   {
     episode: "EP. 001",
-    title: "为什么家庭史值得被保存",
-    summary: "从个人记忆到公共历史，讨论家庭档案能够留下什么。",
-    publishedAt: "2026-06-01",
-    href: "",
+    title: "企业跨越周期的底层推演：从跨越三个世纪的巨擘圣戈班聊起",
+    summary:
+      "以圣戈班、穆拉诺玻璃工匠和中国本土行业为参照，讨论企业与个体跨越历史周期的能力。",
+    publishedAt: "2026-04-01",
+    duration: "60 分钟",
+    href: "https://www.xiaoyuzhoufm.com/episode/69cd3e3cb977fb2c47de7999",
   },
 ];
