@@ -136,34 +136,34 @@ export function SiteFooter() {
           <p className="eyebrow">关注我们 FOLLOW US</p>
           <div className="footer-qr-grid">
             <figure>
-              <div
-                aria-label="微信公众号北雍文化二维码"
-                className="footer-qr-image footer-qr-wechat-new"
-                role="img"
+              <img
+                alt="微信公众号北雍文化二维码"
+                className="footer-qr-image"
+                src="/assets/qr-wechat-beiyong-culture.png"
               />
-              <figcaption>公众号<br />北雍文化</figcaption>
+              <figcaption>公众号（新）<br />北雍文化</figcaption>
             </figure>
             <figure>
-              <div
-                aria-label="微信公众号北雍文化商业智库二维码"
-                className="footer-qr-image footer-qr-wechat-old"
-                role="img"
+              <img
+                alt="微信公众号北雍文化商业智库二维码"
+                className="footer-qr-image"
+                src="/assets/qr-wechat-beiyong-thinktank.png"
               />
-              <figcaption>公众号<br />北雍文化商业智库</figcaption>
+              <figcaption>公众号（旧）<br />北雍文化商业智库</figcaption>
             </figure>
             <figure>
-              <div
-                aria-label="小红书北雍ECC二维码"
-                className="footer-qr-image footer-qr-rednote"
-                role="img"
+              <img
+                alt="小红书北雍ECC二维码"
+                className="footer-qr-image"
+                src="/assets/qr-rednote-beiyong-ecc.png"
               />
               <figcaption>小红书<br />北雍ECC</figcaption>
             </figure>
             <figure>
-              <div
-                aria-label="小宇宙播客北雍ECC二维码"
-                className="footer-qr-image footer-qr-podcast"
-                role="img"
+              <img
+                alt="小宇宙播客北雍ECC二维码"
+                className="footer-qr-image"
+                src="/assets/qr-podcast-beiyong-ecc.png"
               />
               <figcaption>小宇宙播客<br />北雍ECC</figcaption>
             </figure>

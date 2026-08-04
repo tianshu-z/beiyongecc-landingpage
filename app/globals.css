@@ -2056,30 +2056,13 @@ button {
 }
 
 .footer-qr-image {
+  display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
   background-color: #f5f2ed;
-  background-image: url("/assets/social-qr-source.png");
-  background-repeat: no-repeat;
-  background-size: 487.805% auto;
-  background-position-y: 46.18%;
-}
-
-.footer-qr-wechat-new {
-  background-position-x: 8.3%;
-}
-
-.footer-qr-wechat-old {
-  background-position-x: 36.29%;
-}
-
-.footer-qr-rednote {
-  background-position-x: 64.09%;
-}
-
-.footer-qr-podcast {
-  background-position-x: 92.39%;
+  object-fit: cover;
 }
 
 .footer-qr-grid figcaption {
