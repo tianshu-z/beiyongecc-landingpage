@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type ActivePage = "about" | "essays" | "media" | "join";
+type ActivePage = "about" | "join";
 
 const navigation: Array<{
   key: ActivePage;
@@ -8,8 +8,6 @@ const navigation: Array<{
   href: string;
 }> = [
   { key: "about", label: "关于北雍", href: "/about" },
-  { key: "essays", label: "文章", href: "/essays" },
-  { key: "media", label: "多媒体", href: "/media" },
   { key: "join", label: "加入我们", href: "/join" },
 ];
 

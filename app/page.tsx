@@ -12,24 +12,6 @@ const portals = [
   },
   {
     index: "02",
-    title: "文章",
-    english: "ESSAYS & IDEAS",
-    text: "进入商业史与金融史、艺术的B面与生活美学、文明史与制度史、技术文明等内容线索。",
-    href: "/essays",
-    className: "portal-essays",
-    image: "/assets/ming-bookshelf-transparent-lineart.svg",
-  },
-  {
-    index: "03",
-    title: "多媒体",
-    english: "VIDEO & PODCAST",
-    text: "观看讲座、沙龙与视频，收听北雍播客。",
-    href: "/media",
-    className: "portal-media",
-    image: "/assets/bianzhong-transparent-lineart.svg",
-  },
-  {
-    index: "04",
     title: "加入我们",
     english: "CONTACT & CAREERS",
     text: "关注北雍、发起合作，或成为共同研究与行动的一员。",
@@ -74,8 +56,8 @@ export default function Home() {
             <a className="button button-primary" href="/about">
               认识北雍
             </a>
-            <a className="text-link" href="/essays">
-              阅读我们的内容 <span>↗</span>
+            <a className="text-link" href="/join">
+              加入或联系北雍 <span>↗</span>
             </a>
           </div>
         </div>
