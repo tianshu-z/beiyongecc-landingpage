@@ -3,6 +3,15 @@ import { SectionLabel, SiteFooter, SiteHeader } from "./site-chrome";
 const portals = [
   {
     index: "01",
+    title: "北雍日历",
+    english: "ECC CALENDAR",
+    text: "查看近期的长风沙龙、长风论坛、北雍课程与其他活动。",
+    href: "/calendar",
+    className: "portal-calendar",
+    image: "",
+  },
+  {
+    index: "02",
     title: "关于北雍",
     english: "ABOUT BEIYONG",
     text: "认识我们是谁、面对什么问题，以及如何从历史走向现实行动。",
@@ -11,7 +20,7 @@ const portals = [
     image: "/assets/chinese-armillary-sphere-transparent.svg",
   },
   {
-    index: "02",
+    index: "03",
     title: "加入我们",
     english: "CONTACT & CAREERS",
     text: "关注北雍、发起合作，或成为共同研究与行动的一员。",
@@ -96,13 +105,22 @@ export default function Home() {
               href={portal.href}
               key={portal.title}
             >
-              <img
-                className="portal-art"
-                src={portal.image}
-                alt=""
-                aria-hidden="true"
-              />
-              <span className="portal-art-tint" aria-hidden="true" />
+              {portal.className === "portal-calendar" ? (
+                <span className="portal-calendar-sheet" aria-hidden="true">
+                  <b>ECC</b>
+                  <i /><i /><i /><i /><i /><i /><i /><i /><i />
+                </span>
+              ) : (
+                <>
+                  <img
+                    className="portal-art"
+                    src={portal.image}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <span className="portal-art-tint" aria-hidden="true" />
+                </>
+              )}
               <span className="portal-index">{portal.index}</span>
               <div>
                 <small>{portal.english}</small>
