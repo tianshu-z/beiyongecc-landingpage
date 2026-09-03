@@ -83,18 +83,13 @@ export default function EventManager() {
     const form = new FormData(formElement);
     const id = editingEvent?.id ?? `local-${Date.now()}`;
     const priceType = String(form.get("priceType")) as CalendarEvent["priceType"];
-    const registrationUrl = String(form.get("registrationUrl"));
+    const registrationUrl = String(form.get("registrationUrl")).trim();
     const qrFile = form.get("registrationQrCode");
     const hasQrFile = qrFile instanceof File && qrFile.size > 0;
     const retainedQrCode = editingEvent?.registrationQrCode;
     const coverFile = form.get("coverUpload");
     const hasCoverFile = coverFile instanceof File && coverFile.size > 0;
     const coverUrl = String(form.get("cover")).trim();
-
-    if (!registrationUrl && !hasQrFile && !retainedQrCode) {
-      setFormError("请至少填写报名链接或上传报名二维码。");
-      return;
-    }
 
     if (hasQrFile && qrFile.size > 1_500_000) {
       setFormError("二维码图片请控制在 1.5 MB 以内。");
@@ -325,15 +320,15 @@ export default function EventManager() {
           </div>
 
           <div className="event-manager-field event-manager-field-wide">
-            <label htmlFor="event-registration-url">报名链接</label>
+            <label htmlFor="event-registration-url">报名链接（选填）</label>
             <input defaultValue={editingEvent?.registrationUrl} id="event-registration-url" name="registrationUrl" placeholder="金数据、腾讯问卷或其他报名页面链接" type="url" />
           </div>
 
           <div className="event-manager-field event-manager-field-wide">
-            <label htmlFor="event-registration-qr">报名二维码</label>
+            <label htmlFor="event-registration-qr">报名二维码（选填）</label>
             <input accept="image/png,image/jpeg,image/webp" id="event-registration-qr" name="registrationQrCode" type="file" />
             <small>
-              支持 PNG、JPG 或 WebP；本地版本请控制在 1.5 MB 以内。
+              没有报名入口时可以留空；支持 PNG、JPG 或 WebP，图片请控制在 1.5 MB 以内。
               {editingEvent?.registrationQrCode ? " 已有二维码，不重新上传将保留原图。" : ""}
             </small>
           </div>

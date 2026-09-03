@@ -47,7 +47,7 @@ export default function RegistrationActions({
           <span
             aria-disabled="true"
             className="button button-primary event-registration-button is-disabled"
-            title="尚未填写报名链接"
+            title="本活动暂无报名入口"
           >
             报名
           </span>
