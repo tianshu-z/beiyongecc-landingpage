@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { calendarEvents, getCalendarEvent } from "@/shared/calendar";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
+import RegistrationActions from "../registration-actions";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -56,7 +57,6 @@ export default async function CalendarEventPage({ params }: PageProps) {
 
   const start = new Date(event.startAt);
   const end = new Date(event.endAt);
-  const mailSubject = encodeURIComponent(`咨询报名：${event.title}`);
 
   return (
     <main id="top">
@@ -67,49 +67,23 @@ export default async function CalendarEventPage({ params }: PageProps) {
 
         <header className="event-detail-hero">
           <div className="event-detail-copy">
-            <div className="event-badges">
-              <span>{event.category}</span>
-              <span>{event.mode}</span>
-              {event.demo ? <span>体验数据</span> : null}
-            </div>
             <h1>{event.title}</h1>
-            <p>{event.summary}</p>
           </div>
-          <figure className="event-detail-cover">
-            <img src={event.cover} alt="" />
-          </figure>
-        </header>
-
-        <div className="event-detail-layout">
-          <div className="event-detail-main">
-            <section>
+          <div className="event-detail-visual">
+            <figure className="event-detail-cover">
+              <img src={event.cover} alt={`${event.title}活动海报`} />
+            </figure>
+            <section className="event-detail-intro">
               <p className="eyebrow">ABOUT THE EVENT</p>
-              <h2>活动介绍</h2>
+              <h2>活动简介</h2>
               {event.description.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </section>
-
-            <section>
-              <p className="eyebrow">WHAT TO EXPECT</p>
-              <h2>你将在这里经历什么</h2>
-              <ol className="event-highlight-list">
-                {event.highlights.map((highlight, index) => (
-                  <li key={highlight}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <p>{highlight}</p>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            <section>
-              <p className="eyebrow">FOR WHOM</p>
-              <h2>适合谁参加</h2>
-              <p>{event.audience}</p>
-            </section>
           </div>
+        </header>
 
+        <section className="event-booking-section" aria-label="活动报名信息">
           <aside className="event-booking-card">
             <p className="event-price">{priceLabel(event.priceType, event.priceCny)}</p>
             <dl>
@@ -129,28 +103,22 @@ export default async function CalendarEventPage({ params }: PageProps) {
                 <dt>地点</dt>
                 <dd>{event.city ? `${event.city} · ` : ""}{event.venue}</dd>
               </div>
-              {event.remainingSpots !== undefined ? (
+              {event.capacity !== undefined ? (
                 <div>
-                  <dt>余位</dt>
-                  <dd>{event.remainingSpots} / {event.capacity}</dd>
+                  <dt>人数限制</dt>
+                  <dd>{event.capacity} 人</dd>
                 </div>
               ) : null}
             </dl>
-            <a
-              className="button button-primary event-booking-button"
-              href={`mailto:team@beiyongecc.org?subject=${mailSubject}`}
-            >
-              咨询报名
-            </a>
-            <p className="event-booking-note">
-              当前版本暂以邮件承接咨询。微信小程序上线后，这里将替换为预约、订单和微信支付流程。
-            </p>
+            <RegistrationActions
+              registrationQrCode={event.registrationQrCode}
+              registrationUrl={event.registrationUrl}
+            />
           </aside>
-        </div>
+        </section>
       </article>
 
       <SiteFooter />
     </main>
   );
 }
-

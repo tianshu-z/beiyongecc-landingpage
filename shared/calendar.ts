@@ -33,6 +33,8 @@ export type CalendarEvent = {
   capacity?: number;
   remainingSpots?: number;
   registrationStatus: RegistrationStatus;
+  registrationUrl?: string;
+  registrationQrCode?: string;
   demo: boolean;
 };
 
@@ -177,4 +179,3 @@ export function getCalendarEvent(slug: string) {
 export function eventMonthKey(event: CalendarEvent) {
   return event.startAt.slice(0, 7);
 }
-

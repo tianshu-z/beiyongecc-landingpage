@@ -1,15 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calendarEvents,
   eventCategories,
-  eventModes,
   eventMonthKey,
   type CalendarEvent,
   type EventCategory,
-  type EventMode,
 } from "@/shared/calendar";
+import { readManagedEvents } from "./draft-storage";
 
 const weekDays = ["一", "二", "三", "四", "五", "六", "日"];
 const monthFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -31,8 +30,6 @@ const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
 });
 
 type CategoryFilter = EventCategory | "全部";
-type ModeFilter = EventMode | "全部";
-
 function monthDate(monthKey: string) {
   const [year, month] = monthKey.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, 1));
@@ -60,10 +57,6 @@ function localDay(event: CalendarEvent) {
   return Number(event.startAt.slice(8, 10));
 }
 
-function eventTime(event: CalendarEvent) {
-  return timeFormatter.format(new Date(event.startAt));
-}
-
 function eventDateTime(event: CalendarEvent) {
   const start = new Date(event.startAt);
   const end = new Date(event.endAt);
@@ -76,25 +69,40 @@ function priceLabel(event: CalendarEvent) {
   return `¥${event.priceCny}`;
 }
 
-export default function CalendarView() {
+export default function CalendarView({
+  events,
+  managementMode = false,
+  onEdit,
+  onDelete,
+}: {
+  events?: CalendarEvent[];
+  managementMode?: boolean;
+  onEdit?: (event: CalendarEvent) => void;
+  onDelete?: (event: CalendarEvent) => void;
+} = {}) {
   const [monthKey, setMonthKey] = useState("2026-09");
   const [category, setCategory] = useState<CategoryFilter>("全部");
-  const [mode, setMode] = useState<ModeFilter>("全部");
-  const [selectedSlug, setSelectedSlug] = useState(calendarEvents[0].slug);
+  const [selectedId, setSelectedId] = useState(calendarEvents[0].id);
+  const [storedEvents, setStoredEvents] = useState<CalendarEvent[]>(calendarEvents);
+
+  useEffect(() => {
+    if (events === undefined) setStoredEvents(readManagedEvents());
+  }, [events]);
+
+  const allEvents = events ?? storedEvents;
 
   const filteredEvents = useMemo(
     () =>
-      calendarEvents.filter(
+      allEvents.filter(
         (event) =>
           eventMonthKey(event) === monthKey &&
-          (category === "全部" || event.category === category) &&
-          (mode === "全部" || event.mode === mode),
+          (category === "全部" || event.category === category),
       ),
-    [category, mode, monthKey],
+    [allEvents, category, monthKey],
   );
 
   const selectedEvent =
-    filteredEvents.find((event) => event.slug === selectedSlug) ??
+    filteredEvents.find((event) => event.id === selectedId) ??
     filteredEvents[0] ??
     null;
 
@@ -102,11 +110,11 @@ export default function CalendarView() {
 
   function updateMonth(offset: number) {
     const nextMonth = shiftMonth(monthKey, offset);
-    const firstEvent = calendarEvents.find(
+    const firstEvent = allEvents.find(
       (event) => eventMonthKey(event) === nextMonth,
     );
     setMonthKey(nextMonth);
-    if (firstEvent) setSelectedSlug(firstEvent.slug);
+    if (firstEvent) setSelectedId(firstEvent.id);
   }
 
   return (
@@ -120,21 +128,6 @@ export default function CalendarView() {
                 className={category === item ? "is-active" : undefined}
                 key={item}
                 onClick={() => setCategory(item)}
-                type="button"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="calendar-filter-group calendar-mode-filter">
-          <span>举办方式</span>
-          <div className="calendar-pills">
-            {(["全部", ...eventModes] as ModeFilter[]).map((item) => (
-              <button
-                className={mode === item ? "is-active" : undefined}
-                key={item}
-                onClick={() => setMode(item)}
                 type="button"
               >
                 {item}
@@ -195,13 +188,12 @@ export default function CalendarView() {
                     {dayEvents.map((event) => (
                       <button
                         className={`calendar-event-chip category-${event.category}${
-                          selectedEvent?.slug === event.slug ? " is-selected" : ""
+                          selectedEvent?.id === event.id ? " is-selected" : ""
                         }`}
                         key={event.id}
-                        onClick={() => setSelectedSlug(event.slug)}
+                        onClick={() => setSelectedId(event.id)}
                         type="button"
                       >
-                        <span>{eventTime(event)}</span>
                         <strong>{event.title}</strong>
                       </button>
                     ))}
@@ -217,7 +209,6 @@ export default function CalendarView() {
               <button
                 onClick={() => {
                   setCategory("全部");
-                  setMode("全部");
                 }}
                 type="button"
               >
@@ -227,7 +218,7 @@ export default function CalendarView() {
           ) : null}
         </section>
 
-        <aside className="calendar-selection" aria-live="polite">
+        <section className="calendar-selection" aria-live="polite">
           {selectedEvent ? (
             <article>
               <div className="calendar-selection-cover">
@@ -258,9 +249,28 @@ export default function CalendarView() {
                     <dd>{priceLabel(selectedEvent)}</dd>
                   </div>
                 </dl>
-                <a className="button button-primary calendar-detail-link" href={`/calendar/${selectedEvent.slug}`}>
-                  查看活动与报名
-                </a>
+                {managementMode ? (
+                  <div className="calendar-management-actions">
+                    <button
+                      className="button button-primary"
+                      onClick={() => onEdit?.(selectedEvent)}
+                      type="button"
+                    >
+                      修改活动
+                    </button>
+                    <button
+                      className="button calendar-delete-button"
+                      onClick={() => onDelete?.(selectedEvent)}
+                      type="button"
+                    >
+                      删除活动
+                    </button>
+                  </div>
+                ) : (
+                  <a className="button button-primary calendar-detail-link" href={`/calendar/local/${selectedEvent.id}`}>
+                    查看活动与报名
+                  </a>
+                )}
               </div>
             </article>
           ) : (
@@ -269,26 +279,8 @@ export default function CalendarView() {
               <p>选择一个有活动的日期，查看完整信息。</p>
             </div>
           )}
-        </aside>
-      </div>
-
-      <div className="calendar-mobile-list" aria-label="本月活动列表">
-        {filteredEvents.map((event) => (
-          <a href={`/calendar/${event.slug}`} key={event.id}>
-            <time dateTime={event.startAt}>
-              <strong>{String(localDay(event)).padStart(2, "0")}</strong>
-              <span>{eventTime(event)}</span>
-            </time>
-            <div>
-              <p>{event.category} · {event.mode}</p>
-              <h3>{event.title}</h3>
-              <span>{event.city ? `${event.city} · ` : ""}{event.venue}</span>
-            </div>
-            <i aria-hidden="true">↗</i>
-          </a>
-        ))}
+        </section>
       </div>
     </div>
   );
 }
-
