@@ -5,6 +5,9 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  CALENDAR_MEDIA: R2Bucket;
+  CALENDAR_ADMIN_USER_IDS?: string;
+  CALENDAR_ADMIN_EMAILS?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {

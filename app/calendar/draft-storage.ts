@@ -27,6 +27,26 @@ export function readManagedEvents(): CalendarEvent[] {
   }
 }
 
+export function readLegacyMigrationEvents(): CalendarEvent[] | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const managedValue = window.localStorage.getItem(storageKey);
+    if (managedValue !== null) return parseEvents(managedValue);
+
+    const legacyValue = window.localStorage.getItem(legacyStorageKey);
+    if (legacyValue === null) return null;
+    const localEvents = parseEvents(legacyValue);
+    const localIds = new Set(localEvents.map((event) => event.id));
+    return [
+      ...calendarEvents.filter((event) => !localIds.has(event.id)),
+      ...localEvents,
+    ];
+  } catch {
+    return null;
+  }
+}
+
 function writeManagedEvents(events: CalendarEvent[]) {
   window.localStorage.setItem(storageKey, JSON.stringify(events));
 }

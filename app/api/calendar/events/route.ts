@@ -1,18 +1,16 @@
-import { calendarEvents } from "@/shared/calendar";
+import { listCalendarEvents } from "@/server/calendar-store";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const month = searchParams.get("month");
-  const category = searchParams.get("category");
-  const mode = searchParams.get("mode");
+export const dynamic = "force-dynamic";
 
-  const events = calendarEvents.filter(
-    (event) =>
-      (!month || event.startAt.startsWith(month)) &&
-      (!category || event.category === category) &&
-      (!mode || event.mode === mode),
-  );
-
-  return Response.json({ events });
+export async function GET() {
+  try {
+    return Response.json(await listCalendarEvents());
+  } catch (error) {
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : "暂时无法读取活动。",
+      },
+      { status: 500 },
+    );
+  }
 }
-

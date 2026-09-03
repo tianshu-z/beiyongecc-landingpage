@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { calendarEvents, getCalendarEvent } from "@/shared/calendar";
+import { findCalendarEventBySlug } from "@/server/calendar-store";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
 import RegistrationActions from "../registration-actions";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -23,13 +26,9 @@ const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
   timeZone: "Asia/Shanghai",
 });
 
-export function generateStaticParams() {
-  return calendarEvents.map((event) => ({ slug: event.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const event = getCalendarEvent(slug);
+  const event = await findCalendarEventBySlug(slug);
 
   if (!event) return { title: "活动未找到" };
 
@@ -52,7 +51,7 @@ function priceLabel(priceType: "free" | "paid" | "invitation", priceCny?: number
 
 export default async function CalendarEventPage({ params }: PageProps) {
   const { slug } = await params;
-  const event = getCalendarEvent(slug);
+  const event = await findCalendarEventBySlug(slug);
   if (!event) notFound();
 
   const start = new Date(event.startAt);
@@ -63,24 +62,19 @@ export default async function CalendarEventPage({ params }: PageProps) {
       <SiteHeader active="calendar" />
 
       <article className="event-detail">
-        <a className="event-back-link" href="/calendar">← 返回北雍日历</a>
+        <Link className="event-back-link" href="/calendar">← 返回北雍日历</Link>
 
         <header className="event-detail-hero">
           <div className="event-detail-copy">
             <h1>{event.title}</h1>
           </div>
-          <div className="event-detail-visual">
-            <figure className="event-detail-cover">
-              <img src={event.cover} alt={`${event.title}活动海报`} />
-            </figure>
-            <section className="event-detail-intro">
-              <p className="eyebrow">ABOUT THE EVENT</p>
-              <h2>活动简介</h2>
-              {event.description.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </section>
-          </div>
+          <section className="event-detail-intro">
+            <p className="eyebrow">ABOUT THE EVENT</p>
+            <h2>活动简介</h2>
+            {event.description.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </section>
         </header>
 
         <section className="event-booking-section" aria-label="活动报名信息">
@@ -115,6 +109,12 @@ export default async function CalendarEventPage({ params }: PageProps) {
               registrationUrl={event.registrationUrl}
             />
           </aside>
+        </section>
+
+        <section className="event-poster-section" aria-label="活动海报">
+          <figure className="event-detail-poster">
+            <img src={event.cover} alt={`${event.title}活动海报`} />
+          </figure>
         </section>
       </article>
 

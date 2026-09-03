@@ -2566,6 +2566,57 @@ button {
   gap: 92px;
 }
 
+.event-storage-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px 48px;
+  align-items: center;
+  padding: 30px 32px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.event-storage-status.is-pending {
+  border-color: #c8a66c;
+  background: #f8f0df;
+}
+
+.event-storage-status .eyebrow {
+  margin-bottom: 10px;
+}
+
+.event-storage-status h2 {
+  margin: 0 0 12px;
+  font-size: clamp(25px, 2.5vw, 36px);
+  font-weight: 500;
+}
+
+.event-storage-status > div > p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.event-storage-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.event-storage-error {
+  grid-column: 1 / -1;
+  margin: -8px 0 0;
+  color: var(--beiyong-red);
+  font-size: 12px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .event-manager-calendar,
 .event-manager-editor {
   min-width: 0;
@@ -2855,38 +2906,9 @@ button {
   line-height: 1.18;
 }
 
-.event-detail-visual {
-  border-left: 1px solid var(--line);
-}
-
-.event-detail-cover {
-  height: clamp(165px, 15.5vw, 215px);
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  background:
-    linear-gradient(rgb(27 33 30 / 8%), rgb(27 33 30 / 20%)),
-    var(--paper-deep);
-}
-
-.event-detail-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  mix-blend-mode: multiply;
-}
-
-.event-detail-cover img[src$=".svg"] {
-  width: 78%;
-  height: 78%;
-  object-fit: contain;
-  opacity: 0.56;
-}
-
 .event-detail-intro {
   padding: 32px clamp(28px, 3.6vw, 52px) 38px;
-  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
 }
 
 .event-detail-intro .eyebrow {
@@ -2909,6 +2931,37 @@ button {
 
 .event-booking-section {
   padding-top: 28px;
+}
+
+.event-poster-section {
+  display: grid;
+  place-items: center;
+  margin-top: 28px;
+  padding: clamp(28px, 4vw, 58px);
+  border: 1px solid var(--line);
+  background: #faf7f1;
+}
+
+.event-detail-poster {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.event-detail-poster img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(78vh, 820px);
+  object-fit: contain;
+}
+
+.event-detail-poster img[src$=".svg"] {
+  width: min(52%, 520px);
+  opacity: 0.62;
 }
 
 .event-booking-card {
@@ -3885,11 +3938,7 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .event-detail-cover {
-    height: 210px;
-  }
-
-  .event-detail-visual {
+  .event-detail-intro {
     border-top: 1px solid var(--line);
     border-left: 0;
   }
@@ -4007,12 +4056,16 @@ button {
     font-size: clamp(29px, 5.4vw, 36px);
   }
 
-  .event-detail-cover {
-    height: 170px;
-  }
-
   .event-detail-intro {
     padding: 28px 24px 32px;
+  }
+
+  .event-poster-section {
+    padding: 22px;
+  }
+
+  .event-detail-poster img {
+    max-height: 72vh;
   }
 
   .event-detail-layout {
@@ -4075,6 +4128,16 @@ button {
 
   .event-manager {
     gap: 64px;
+  }
+
+  .event-storage-status {
+    grid-template-columns: 1fr;
+    padding: 24px 22px;
+  }
+
+  .event-storage-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .event-manager-section-heading {

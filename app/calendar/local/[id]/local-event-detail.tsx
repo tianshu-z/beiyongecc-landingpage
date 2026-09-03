@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { CalendarEvent } from "@/shared/calendar";
-import { readManagedEvents } from "../../draft-storage";
 import RegistrationActions from "../../registration-actions";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -30,7 +29,17 @@ export default function LocalEventDetail({ id }: { id: string }) {
   const [event, setEvent] = useState<CalendarEvent | null | undefined>(undefined);
 
   useEffect(() => {
-    setEvent(readManagedEvents().find((item) => item.id === id) ?? null);
+    const controller = new AbortController();
+    fetch("/api/calendar/events", { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("活动读取失败");
+        return response.json() as Promise<{ events: CalendarEvent[] }>;
+      })
+      .then((payload) => {
+        setEvent(payload.events.find((item) => item.id === id) ?? null);
+      })
+      .catch(() => setEvent(null));
+    return () => controller.abort();
   }, [id]);
 
   if (event === undefined) {
@@ -38,7 +47,7 @@ export default function LocalEventDetail({ id }: { id: string }) {
   }
 
   if (event === null) {
-    return <p className="local-event-state">没有找到这项本地活动。</p>;
+    return <p className="local-event-state">没有找到这项活动。</p>;
   }
 
   const start = new Date(event.startAt);
@@ -50,18 +59,13 @@ export default function LocalEventDetail({ id }: { id: string }) {
         <div className="event-detail-copy">
           <h1>{event.title}</h1>
         </div>
-        <div className="event-detail-visual">
-          <figure className="event-detail-cover">
-            <img src={event.cover} alt={`${event.title}活动海报`} />
-          </figure>
-          <section className="event-detail-intro">
-            <p className="eyebrow">ABOUT THE EVENT</p>
-            <h2>活动简介</h2>
-            {event.description.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </section>
-        </div>
+        <section className="event-detail-intro">
+          <p className="eyebrow">ABOUT THE EVENT</p>
+          <h2>活动简介</h2>
+          {event.description.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </section>
       </header>
 
       <section className="event-booking-section" aria-label="活动报名信息">
@@ -96,6 +100,12 @@ export default function LocalEventDetail({ id }: { id: string }) {
             registrationUrl={event.registrationUrl}
           />
         </aside>
+      </section>
+
+      <section className="event-poster-section" aria-label="活动海报">
+        <figure className="event-detail-poster">
+          <img src={event.cover} alt={`${event.title}活动海报`} />
+        </figure>
       </section>
     </>
   );

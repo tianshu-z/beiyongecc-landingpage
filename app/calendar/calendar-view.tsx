@@ -8,7 +8,6 @@ import {
   type CalendarEvent,
   type EventCategory,
 } from "@/shared/calendar";
-import { readManagedEvents } from "./draft-storage";
 
 const weekDays = ["一", "二", "三", "四", "五", "六", "日"];
 const monthFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -86,7 +85,19 @@ export default function CalendarView({
   const [storedEvents, setStoredEvents] = useState<CalendarEvent[]>(calendarEvents);
 
   useEffect(() => {
-    if (events === undefined) setStoredEvents(readManagedEvents());
+    if (events !== undefined) return;
+
+    const controller = new AbortController();
+    fetch("/api/calendar/events", { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("活动读取失败");
+        return response.json() as Promise<{ events: CalendarEvent[] }>;
+      })
+      .then((payload) => setStoredEvents(payload.events))
+      .catch(() => {
+        // Keep the bundled event list visible if the network is unavailable.
+      });
+    return () => controller.abort();
   }, [events]);
 
   const allEvents = events ?? storedEvents;
@@ -267,7 +278,7 @@ export default function CalendarView({
                     </button>
                   </div>
                 ) : (
-                  <a className="button button-primary calendar-detail-link" href={`/calendar/local/${selectedEvent.id}`}>
+                  <a className="button button-primary calendar-detail-link" href={`/calendar/${selectedEvent.slug}`}>
                     查看活动与报名
                   </a>
                 )}

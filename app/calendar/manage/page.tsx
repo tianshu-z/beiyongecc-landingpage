@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { requireChatGPTUser } from "../../chatgpt-auth";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
 import EventManager from "./event-manager";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "活动管理 · 北雍日历",
@@ -8,6 +11,19 @@ export const metadata: Metadata = {
 };
 
 export default function CalendarManagePage() {
+  if (process.env.NODE_ENV !== "development") {
+    return <ProtectedCalendarManager />;
+  }
+
+  return <CalendarManagerPage />;
+}
+
+async function ProtectedCalendarManager() {
+  await requireChatGPTUser("/calendar/manage");
+  return <CalendarManagerPage />;
+}
+
+function CalendarManagerPage() {
   return (
     <main id="top">
       <SiteHeader active="calendar" />
@@ -23,4 +39,3 @@ export default function CalendarManagePage() {
     </main>
   );
 }
-

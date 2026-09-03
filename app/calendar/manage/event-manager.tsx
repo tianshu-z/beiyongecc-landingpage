@@ -8,12 +8,12 @@ import {
   type CalendarEvent,
 } from "@/shared/calendar";
 import CalendarView from "../calendar-view";
-import {
-  addManagedEvent,
-  readManagedEvents,
-  removeManagedEvent,
-  updateManagedEvent,
-} from "../draft-storage";
+import { readLegacyMigrationEvents } from "../draft-storage";
+
+type CalendarApiPayload = {
+  events: CalendarEvent[];
+  migrationCompleted: boolean;
+};
 
 function withChinaOffset(value: string) {
   return `${value}:00+08:00`;
@@ -23,7 +23,7 @@ function dateTimeInputValue(value?: string) {
   return value ? value.slice(0, 16) : "";
 }
 
-function fileToDataUrl(file: File) {
+function blobToDataUrl(file: Blob) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
@@ -32,8 +32,8 @@ function fileToDataUrl(file: File) {
   });
 }
 
-function posterFileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
+function posterFileToBlob(file: File) {
+  return new Promise<Blob>((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const image = new Image();
 
@@ -51,7 +51,11 @@ function posterFileToDataUrl(file: File) {
 
         if (!context) throw new Error("无法处理活动海报");
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/webp", 0.82));
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("无法处理活动海报"))),
+          "image/webp",
+          0.82,
+        );
       } catch (error) {
         reject(error);
       } finally {
@@ -66,18 +70,74 @@ function posterFileToDataUrl(file: File) {
   });
 }
 
+async function readApiPayload(response: Response) {
+  const payload = (await response.json()) as CalendarApiPayload & {
+    error?: string;
+  };
+  if (!response.ok) throw new Error(payload.error || "操作失败，请稍后再试。");
+  return payload;
+}
+
+function downloadBackup(events: CalendarEvent[]) {
+  const backup = JSON.stringify(
+    { exportedAt: new Date().toISOString(), events },
+    null,
+    2,
+  );
+  const url = URL.createObjectURL(
+    new Blob([backup], { type: "application/json;charset=utf-8" }),
+  );
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `ecc-calendar-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function EventManager() {
   const [events, setEvents] = useState<CalendarEvent[]>(calendarEvents);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [formError, setFormError] = useState("");
+  const [legacyEvents, setLegacyEvents] = useState<CalendarEvent[] | null>(null);
+  const [migrationCompleted, setMigrationCompleted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
-    setEvents(readManagedEvents());
+    const localEvents = readLegacyMigrationEvents();
+    const controller = new AbortController();
+
+    fetch("/api/calendar/events", { signal: controller.signal })
+      .then(readApiPayload)
+      .then((payload) => {
+        setLegacyEvents(localEvents);
+        setMigrationCompleted(payload.migrationCompleted);
+        setEvents(
+          localEvents?.length && !payload.migrationCompleted
+            ? localEvents
+            : payload.events,
+        );
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setLegacyEvents(localEvents);
+        if (localEvents?.length) setEvents(localEvents);
+        setFormError(error instanceof Error ? error.message : "暂时无法连接活动资料库。");
+      })
+      .finally(() => setIsLoading(false));
+
+    return () => controller.abort();
   }, []);
 
+  const migrationPending = Boolean(legacyEvents?.length && !migrationCompleted);
+
   function startEditing(event: CalendarEvent) {
+    if (migrationPending) {
+      setFormError("请先迁移本机已有活动，再进行修改。");
+      return;
+    }
     setEditingEvent(event);
     setPosterPreview(event.cover);
     setSaved(false);
@@ -90,13 +150,25 @@ export default function EventManager() {
     }, 0);
   }
 
-  function deleteEvent(event: CalendarEvent) {
+  async function deleteEvent(event: CalendarEvent) {
+    if (migrationPending) {
+      setFormError("请先迁移本机已有活动，再进行删除操作。");
+      return;
+    }
     const confirmed = window.confirm(`确定删除“${event.title}”吗？`);
     if (!confirmed) return;
 
-    removeManagedEvent(event.id);
-    setEvents(readManagedEvents());
-    if (editingEvent?.id === event.id) setEditingEvent(null);
+    try {
+      const response = await fetch(`/api/calendar/events/${encodeURIComponent(event.id)}`, {
+        method: "DELETE",
+      });
+      await readApiPayload(response);
+      setEvents((current) => current.filter((item) => item.id !== event.id));
+      if (editingEvent?.id === event.id) setEditingEvent(null);
+      setFormError("");
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "活动删除失败。");
+    }
   }
 
   async function previewPoster(file: File | undefined) {
@@ -108,7 +180,7 @@ export default function EventManager() {
     }
 
     try {
-      setPosterPreview(await posterFileToDataUrl(file));
+      setPosterPreview(await blobToDataUrl(await posterFileToBlob(file)));
       setFormError("");
     } catch {
       setFormError("这张海报无法读取，请换一张 PNG、JPG 或 WebP 图片。");
@@ -117,6 +189,10 @@ export default function EventManager() {
 
   async function submitEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (migrationPending) {
+      setFormError("请先完成上方的本机活动迁移，再保存修改。");
+      return;
+    }
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const id = editingEvent?.id ?? `local-${Date.now()}`;
@@ -139,13 +215,10 @@ export default function EventManager() {
       return;
     }
 
-    const registrationQrCode = hasQrFile
-      ? await fileToDataUrl(qrFile)
-      : retainedQrCode;
-    let uploadedCover: string | undefined;
+    let uploadedCover: Blob | undefined;
     try {
       uploadedCover = hasCoverFile
-        ? await posterFileToDataUrl(coverFile)
+        ? await posterFileToBlob(coverFile)
         : undefined;
     } catch {
       setFormError("这张海报无法读取，请换一张 PNG、JPG 或 WebP 图片。");
@@ -173,7 +246,6 @@ export default function EventManager() {
       highlights: editingEvent?.highlights ?? [],
       audience: editingEvent?.audience ?? "",
       cover:
-        uploadedCover ||
         coverUrl ||
         editingEvent?.cover ||
         "/assets/chinese-armillary-sphere-transparent.svg",
@@ -183,16 +255,37 @@ export default function EventManager() {
       capacity: Number(form.get("capacity")) || undefined,
       registrationStatus: editingEvent?.registrationStatus ?? "open",
       registrationUrl: registrationUrl || undefined,
-      registrationQrCode,
+      registrationQrCode: retainedQrCode,
       demo: false,
     };
 
     try {
-      if (editingEvent) updateManagedEvent(managedEvent);
-      else addManagedEvent(managedEvent);
-      setEvents(readManagedEvents());
-    } catch {
-      setFormError("保存失败：浏览器存储空间不足。请换一张更小的海报后重试。");
+      const requestBody = new FormData();
+      requestBody.set(
+        "event",
+        JSON.stringify({
+          ...managedEvent,
+          previousCover: editingEvent?.cover,
+          previousQrCode: editingEvent?.registrationQrCode,
+        }),
+      );
+      if (uploadedCover) requestBody.set("poster", uploadedCover, "poster.webp");
+      if (hasQrFile) requestBody.set("registrationQrCode", qrFile);
+
+      const response = await fetch(`/api/calendar/events/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: requestBody,
+      });
+      const payload = (await response.json()) as { event?: CalendarEvent; error?: string };
+      if (!response.ok || !payload.event) {
+        throw new Error(payload.error || "活动保存失败。");
+      }
+      setEvents((current) => {
+        const next = current.filter((item) => item.id !== payload.event?.id);
+        return [...next, payload.event as CalendarEvent].sort((a, b) => a.startAt.localeCompare(b.startAt));
+      });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "活动保存失败。");
       return;
     }
     setEditingEvent(null);
@@ -202,8 +295,67 @@ export default function EventManager() {
     formElement.reset();
   }
 
+  async function migrateLegacyEvents() {
+    if (!legacyEvents?.length) return;
+    setIsMigrating(true);
+    setFormError("");
+    downloadBackup(legacyEvents);
+
+    try {
+      const response = await fetch("/api/calendar/migrate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ events: legacyEvents }),
+      });
+      const payload = await readApiPayload(response);
+      setEvents(payload.events);
+      setMigrationCompleted(true);
+      setSaved(true);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "本机活动迁移失败。");
+    } finally {
+      setIsMigrating(false);
+    }
+  }
+
   return (
     <div className="event-manager">
+      <section className={`event-storage-status${migrationPending ? " is-pending" : " is-ready"}`}>
+        <div>
+          <p className="eyebrow">CLOUD STORAGE</p>
+          <h2>{migrationPending ? "迁移本机已有活动" : "活动资料已使用云端存储"}</h2>
+          <p>
+            {migrationPending
+              ? `检测到本机保存的 ${legacyEvents?.length ?? 0} 项活动。迁移前会自动下载一份完整备份；迁移完成后，本机旧数据仍会保留。`
+              : "活动文字资料存入数据库，海报和报名二维码存入图片空间，不再占用浏览器容量。"}
+          </p>
+        </div>
+        <div className="event-storage-actions">
+          {legacyEvents?.length ? (
+            <button
+              className="button"
+              onClick={() => downloadBackup(legacyEvents)}
+              type="button"
+            >
+              下载本机备份
+            </button>
+          ) : null}
+          {migrationPending ? (
+            <button
+              className="button button-primary"
+              disabled={isMigrating}
+              onClick={migrateLegacyEvents}
+              type="button"
+            >
+              {isMigrating ? "正在安全迁移……" : "备份并迁移到云端"}
+            </button>
+          ) : null}
+        </div>
+        {formError && migrationPending ? (
+          <p className="event-storage-error" role="alert">{formError}</p>
+        ) : null}
+      </section>
+
       <section className="event-manager-calendar" aria-label="活动管理日历">
         <div className="event-manager-section-heading">
           <div>
@@ -212,6 +364,7 @@ export default function EventManager() {
           </div>
           <button
             className="button"
+            disabled={migrationPending || isLoading}
             onClick={() => {
               setEditingEvent(null);
               setPosterPreview(null);
@@ -221,7 +374,7 @@ export default function EventManager() {
             }}
             type="button"
           >
-            新建活动
+            {isLoading ? "正在连接……" : "新建活动"}
           </button>
         </div>
         <CalendarView
@@ -362,7 +515,7 @@ export default function EventManager() {
                   placeholder="例如：/assets/event-poster.jpg"
                 />
                 <small>
-                  支持 PNG、JPG 或 WebP，原文件请控制在 5 MB 以内；上传后会自动等比例压缩再保存。
+                  支持 PNG、JPG 或 WebP，原文件请控制在 5 MB 以内；上传后会自动等比例压缩并存入云端。
                   {editingEvent?.cover ? " 不重新上传或填写新地址，将保留当前海报。" : ""}
                 </small>
               </div>
@@ -384,11 +537,15 @@ export default function EventManager() {
           </div>
 
           <div className="event-manager-actions event-manager-field-wide">
-            <button className="button button-primary" type="submit">
+            <button
+              className="button button-primary"
+              disabled={migrationPending || isLoading}
+              type="submit"
+            >
               {editingEvent ? "保存修改" : "保存并加入日历"}
             </button>
             {formError ? <p role="alert">{formError}</p> : null}
-            {saved ? <span>活动信息已保存。</span> : null}
+            {saved ? <span>活动信息已保存到云端。</span> : null}
           </div>
         </form>
       </section>
