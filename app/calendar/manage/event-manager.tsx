@@ -35,6 +35,7 @@ function fileToDataUrl(file: File) {
 export default function EventManager() {
   const [events, setEvents] = useState<CalendarEvent[]>(calendarEvents);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -44,6 +45,7 @@ export default function EventManager() {
 
   function startEditing(event: CalendarEvent) {
     setEditingEvent(event);
+    setPosterPreview(event.cover);
     setSaved(false);
     setFormError("");
     window.setTimeout(() => {
@@ -63,6 +65,18 @@ export default function EventManager() {
     if (editingEvent?.id === event.id) setEditingEvent(null);
   }
 
+  async function previewPoster(file: File | undefined) {
+    if (!file || file.size === 0) return;
+
+    if (file.size > 3_000_000) {
+      setFormError("活动海报请控制在 3 MB 以内。");
+      return;
+    }
+
+    setPosterPreview(await fileToDataUrl(file));
+    setFormError("");
+  }
+
   async function submitEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
@@ -73,6 +87,9 @@ export default function EventManager() {
     const qrFile = form.get("registrationQrCode");
     const hasQrFile = qrFile instanceof File && qrFile.size > 0;
     const retainedQrCode = editingEvent?.registrationQrCode;
+    const coverFile = form.get("coverUpload");
+    const hasCoverFile = coverFile instanceof File && coverFile.size > 0;
+    const coverUrl = String(form.get("cover")).trim();
 
     if (!registrationUrl && !hasQrFile && !retainedQrCode) {
       setFormError("请至少填写报名链接或上传报名二维码。");
@@ -84,9 +101,15 @@ export default function EventManager() {
       return;
     }
 
+    if (hasCoverFile && coverFile.size > 3_000_000) {
+      setFormError("活动海报请控制在 3 MB 以内。");
+      return;
+    }
+
     const registrationQrCode = hasQrFile
       ? await fileToDataUrl(qrFile)
       : retainedQrCode;
+    const uploadedCover = hasCoverFile ? await fileToDataUrl(coverFile) : undefined;
     const description = String(form.get("description"))
       .split("\n")
       .map((paragraph) => paragraph.trim())
@@ -109,7 +132,8 @@ export default function EventManager() {
       highlights: editingEvent?.highlights ?? [],
       audience: editingEvent?.audience ?? "",
       cover:
-        String(form.get("cover")) ||
+        uploadedCover ||
+        coverUrl ||
         editingEvent?.cover ||
         "/assets/chinese-armillary-sphere-transparent.svg",
       priceType,
@@ -127,6 +151,7 @@ export default function EventManager() {
 
     setEvents(readManagedEvents());
     setEditingEvent(null);
+    setPosterPreview(null);
     setSaved(true);
     setFormError("");
     formElement.reset();
@@ -144,7 +169,9 @@ export default function EventManager() {
             className="button"
             onClick={() => {
               setEditingEvent(null);
+              setPosterPreview(null);
               setSaved(false);
+              setFormError("");
               document.getElementById("event-editor")?.scrollIntoView({ behavior: "smooth" });
             }}
             type="button"
@@ -169,7 +196,11 @@ export default function EventManager() {
           {editingEvent ? (
             <button
               className="event-editor-cancel"
-              onClick={() => setEditingEvent(null)}
+              onClick={() => {
+                setEditingEvent(null);
+                setPosterPreview(null);
+                setFormError("");
+              }}
               type="button"
             >
               取消修改
@@ -255,9 +286,42 @@ export default function EventManager() {
             <input defaultValue={editingEvent?.capacity} id="event-capacity" min="1" name="capacity" required type="number" />
           </div>
 
-          <div className="event-manager-field">
-            <label htmlFor="event-cover">海报地址（选填）</label>
-            <input defaultValue={editingEvent?.cover} id="event-cover" name="cover" placeholder="例如：/assets/event-poster.jpg" />
+          <div className="event-manager-field event-manager-field-wide">
+            <span className="event-manager-field-label">活动海报</span>
+            <div className="event-manager-poster-editor">
+              <div className="event-manager-poster-preview">
+                {posterPreview ? (
+                  <img alt="当前活动海报预览" src={posterPreview} />
+                ) : (
+                  <span>尚未设置海报</span>
+                )}
+              </div>
+              <div className="event-manager-poster-controls">
+                <label htmlFor="event-cover-upload">上传／更换海报</label>
+                <input
+                  accept="image/png,image/jpeg,image/webp"
+                  id="event-cover-upload"
+                  name="coverUpload"
+                  onChange={(event) => previewPoster(event.currentTarget.files?.[0])}
+                  type="file"
+                />
+                <span className="event-manager-poster-or">或者填写海报地址</span>
+                <input
+                  defaultValue={editingEvent?.cover.startsWith("data:") ? "" : editingEvent?.cover}
+                  id="event-cover"
+                  name="cover"
+                  onChange={(event) => {
+                    const value = event.currentTarget.value.trim();
+                    setPosterPreview(value || editingEvent?.cover || null);
+                  }}
+                  placeholder="例如：/assets/event-poster.jpg"
+                />
+                <small>
+                  支持 PNG、JPG 或 WebP，图片请控制在 3 MB 以内。
+                  {editingEvent?.cover ? " 不重新上传或填写新地址，将保留当前海报。" : ""}
+                </small>
+              </div>
+            </div>
           </div>
 
           <div className="event-manager-field event-manager-field-wide">
@@ -286,4 +350,3 @@ export default function EventManager() {
     </div>
   );
 }
-
