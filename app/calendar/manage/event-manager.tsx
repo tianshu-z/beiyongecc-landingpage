@@ -32,6 +32,40 @@ function fileToDataUrl(file: File) {
   });
 }
 
+function posterFileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const maxDimension = 1600;
+        const scale = Math.min(
+          1,
+          maxDimension / Math.max(image.naturalWidth, image.naturalHeight),
+        );
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+
+        if (!context) throw new Error("无法处理活动海报");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/webp", 0.82));
+      } catch (error) {
+        reject(error);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("无法读取活动海报"));
+    };
+    image.src = objectUrl;
+  });
+}
+
 export default function EventManager() {
   const [events, setEvents] = useState<CalendarEvent[]>(calendarEvents);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
@@ -68,13 +102,17 @@ export default function EventManager() {
   async function previewPoster(file: File | undefined) {
     if (!file || file.size === 0) return;
 
-    if (file.size > 3_000_000) {
-      setFormError("活动海报请控制在 3 MB 以内。");
+    if (file.size > 5_000_000) {
+      setFormError("活动海报原文件请控制在 5 MB 以内。");
       return;
     }
 
-    setPosterPreview(await fileToDataUrl(file));
-    setFormError("");
+    try {
+      setPosterPreview(await posterFileToDataUrl(file));
+      setFormError("");
+    } catch {
+      setFormError("这张海报无法读取，请换一张 PNG、JPG 或 WebP 图片。");
+    }
   }
 
   async function submitEvent(event: FormEvent<HTMLFormElement>) {
@@ -96,15 +134,23 @@ export default function EventManager() {
       return;
     }
 
-    if (hasCoverFile && coverFile.size > 3_000_000) {
-      setFormError("活动海报请控制在 3 MB 以内。");
+    if (hasCoverFile && coverFile.size > 5_000_000) {
+      setFormError("活动海报原文件请控制在 5 MB 以内。");
       return;
     }
 
     const registrationQrCode = hasQrFile
       ? await fileToDataUrl(qrFile)
       : retainedQrCode;
-    const uploadedCover = hasCoverFile ? await fileToDataUrl(coverFile) : undefined;
+    let uploadedCover: string | undefined;
+    try {
+      uploadedCover = hasCoverFile
+        ? await posterFileToDataUrl(coverFile)
+        : undefined;
+    } catch {
+      setFormError("这张海报无法读取，请换一张 PNG、JPG 或 WebP 图片。");
+      return;
+    }
     const description = String(form.get("description"))
       .split("\n")
       .map((paragraph) => paragraph.trim())
@@ -141,10 +187,14 @@ export default function EventManager() {
       demo: false,
     };
 
-    if (editingEvent) updateManagedEvent(managedEvent);
-    else addManagedEvent(managedEvent);
-
-    setEvents(readManagedEvents());
+    try {
+      if (editingEvent) updateManagedEvent(managedEvent);
+      else addManagedEvent(managedEvent);
+      setEvents(readManagedEvents());
+    } catch {
+      setFormError("保存失败：浏览器存储空间不足。请换一张更小的海报后重试。");
+      return;
+    }
     setEditingEvent(null);
     setPosterPreview(null);
     setSaved(true);
@@ -312,7 +362,7 @@ export default function EventManager() {
                   placeholder="例如：/assets/event-poster.jpg"
                 />
                 <small>
-                  支持 PNG、JPG 或 WebP，图片请控制在 3 MB 以内。
+                  支持 PNG、JPG 或 WebP，原文件请控制在 5 MB 以内；上传后会自动等比例压缩再保存。
                   {editingEvent?.cover ? " 不重新上传或填写新地址，将保留当前海报。" : ""}
                 </small>
               </div>
