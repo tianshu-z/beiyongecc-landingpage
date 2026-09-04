@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { requireChatGPTUser } from "../../chatgpt-auth";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
 import EventManager from "./event-manager";
 
@@ -11,19 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function CalendarManagePage() {
-  if (process.env.NODE_ENV !== "development") {
-    return <ProtectedCalendarManager />;
-  }
-
-  return <CalendarManagerPage />;
-}
-
-async function ProtectedCalendarManager() {
-  await requireChatGPTUser("/calendar/manage");
-  return <CalendarManagerPage />;
-}
-
-function CalendarManagerPage() {
   return (
     <main id="top">
       <SiteHeader active="calendar" />

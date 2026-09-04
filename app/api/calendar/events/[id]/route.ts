@@ -1,4 +1,3 @@
-import { requireCalendarManager } from "@/server/calendar-auth";
 import {
   removeCalendarMedia,
   storeCalendarFile,
@@ -24,9 +23,6 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = requireCalendarManager(request);
-  if (unauthorized) return unauthorized;
-
   try {
     const { id } = await params;
     const form = await request.formData();
@@ -75,9 +71,6 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = requireCalendarManager(request);
-  if (unauthorized) return unauthorized;
-
   try {
     const { id } = await params;
     const { events } = await listCalendarEvents();

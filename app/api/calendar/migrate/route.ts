@@ -1,4 +1,3 @@
-import { requireCalendarManager } from "@/server/calendar-auth";
 import {
   storeDataUrl,
   storeMigrationBackup,
@@ -33,9 +32,6 @@ async function migrateEventMedia(event: CalendarEvent) {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = requireCalendarManager(request);
-  if (unauthorized) return unauthorized;
-
   try {
     const rawBody = await request.text();
     if (rawBody.length > 12_000_000) {

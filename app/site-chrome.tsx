@@ -7,8 +7,8 @@ const navigation: Array<{
   label: string;
   href: string;
 }> = [
-  { key: "calendar", label: "北雍日历", href: "/calendar" },
   { key: "about", label: "关于北雍", href: "/about" },
+  { key: "calendar", label: "北雍日历", href: "/calendar" },
   { key: "join", label: "加入我们", href: "/join" },
 ];
 
