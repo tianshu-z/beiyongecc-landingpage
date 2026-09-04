@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCalendarEventBySlug } from "@/server/calendar-store";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
@@ -62,7 +61,7 @@ export default async function CalendarEventPage({ params }: PageProps) {
       <SiteHeader active="calendar" />
 
       <article className="event-detail">
-        <Link className="event-back-link" href="/calendar">← 返回北雍日历</Link>
+        <a className="event-back-link" href="/calendar">← 返回北雍日历</a>
 
         <header className="event-detail-hero">
           <div className="event-detail-copy">

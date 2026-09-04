@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 type ActivePage = "calendar" | "about" | "join";
@@ -16,13 +15,13 @@ const navigation: Array<{
 export function SiteHeader({ active }: { active?: ActivePage }) {
   return (
     <header className="site-header">
-      <Link className="brand" href="/" aria-label="返回北雍首页">
+      <a className="brand" href="/" aria-label="返回北雍首页">
         <img className="brand-logo" src="/assets/印章北大红.svg" alt="" />
         <span>
           北雍文化商业智库
           <small>EURUS CULTURAL COLLECTIVE</small>
         </span>
-      </Link>
+      </a>
 
       <nav className="desktop-nav" aria-label="主导航">
         {navigation.map((item) => (

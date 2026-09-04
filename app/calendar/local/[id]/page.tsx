@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SiteFooter, SiteHeader } from "../../../site-chrome";
 import LocalEventDetail from "./local-event-detail";
 
@@ -19,7 +18,7 @@ export default async function LocalEventPage({
     <main id="top">
       <SiteHeader active="calendar" />
       <article className="event-detail">
-        <Link className="event-back-link" href="/calendar">← 返回北雍日历</Link>
+        <a className="event-back-link" href="/calendar">← 返回北雍日历</a>
         <LocalEventDetail id={id} />
       </article>
       <SiteFooter />
