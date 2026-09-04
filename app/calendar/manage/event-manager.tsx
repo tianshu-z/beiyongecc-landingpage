@@ -90,8 +90,10 @@ function downloadBackup(events: CalendarEvent[]) {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = `ecc-calendar-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(anchor);
   anchor.click();
-  URL.revokeObjectURL(url);
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
 export default function EventManager() {
@@ -299,7 +301,12 @@ export default function EventManager() {
     if (!legacyEvents?.length) return;
     setIsMigrating(true);
     setFormError("");
-    downloadBackup(legacyEvents);
+    try {
+      downloadBackup(legacyEvents);
+    } catch {
+      // The server stores another full backup before migration, so a browser
+      // download restriction must not prevent the actual migration request.
+    }
 
     try {
       const response = await fetch("/api/calendar/migrate", {
