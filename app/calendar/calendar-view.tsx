@@ -175,7 +175,10 @@ export default function CalendarView({
 
           <div className="calendar-weekdays" aria-hidden="true">
             {weekDays.map((day) => (
-              <span key={day}>星期{day}</span>
+              <span key={day}>
+                <span className="calendar-weekday-prefix">星期</span>
+                {day}
+              </span>
             ))}
           </div>
 
