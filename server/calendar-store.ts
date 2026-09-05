@@ -111,6 +111,13 @@ export function normalizeCalendarEvent(value: unknown): CalendarEvent {
 }
 
 export async function listCalendarEvents() {
+  if (process.env.ECC_STATIC_EXPORT === "1") {
+    return {
+      events: [...bundledEvents].sort((a, b) => a.startAt.localeCompare(b.startAt)),
+      migrationCompleted: true,
+    };
+  }
+
   await ensureCalendarSchema();
   const db = database();
   const [stored, deleted, migration] = await Promise.all([

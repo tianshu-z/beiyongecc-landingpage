@@ -1,98 +1,48 @@
-# vinext-starter
+# 北雍文化商业智库官网
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+北雍官网与 ECC Calendar 的源代码。公开网站通过 GitHub Pages 发布；活动管理页面只在本地开发环境使用。
 
-## Prerequisites
+## 本地预览与管理
 
-- Node.js `>=22.13.0`
-
-## Quick Start
+需要 Node.js 22 或更高版本。
 
 ```bash
 npm install
 npm run dev
-npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+打开：
 
-## Included Shape
+- 官网：`http://localhost:3000/`
+- 北雍日历：`http://localhost:3000/calendar`
+- 本地活动管理：`http://localhost:3000/calendar/manage`
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+本地管理页使用本机的开发数据库与图片空间，不会直接改动 GitHub Pages 上的公开数据。
 
-## Workspace Auth Headers
+## GitHub Pages 发布方式
 
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
+公开活动快照维护在 `shared/calendar.ts`，活动图片保存在 `public/assets/calendar/`。生成静态网站：
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+npm run pages:build
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+结果会写入 `pages-dist/`。这里仅包含：
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+- 主页
+- 关于北雍
+- 北雍日历及活动详情
+- 加入我们
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+`/calendar/manage` 不会进入静态发布结果。
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+推送到 `main` 后，`.github/workflows/deploy-pages.yml` 会自动重新构建并部署 GitHub Pages。
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+## 更新活动的日常流程
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+1. 在本地管理页新增或修改活动，确认页面效果。
+2. 将最终活动资料同步到 `shared/calendar.ts`，并将海报、二维码放入 `public/assets/calendar/`。
+3. 运行 `npm run pages:build` 做本地静态构建检查。
+4. 确认无误后再提交并推送到 GitHub；GitHub Actions 会更新公开网站。
 
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+这个流程刻意把“编辑”和“发布”分开，避免本地试改直接影响官网。

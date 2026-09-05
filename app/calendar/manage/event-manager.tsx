@@ -329,12 +329,12 @@ export default function EventManager() {
     <div className="event-manager">
       <section className={`event-storage-status${migrationPending ? " is-pending" : " is-ready"}`}>
         <div>
-          <p className="eyebrow">CLOUD STORAGE</p>
-          <h2>{migrationPending ? "迁移本机已有活动" : "活动资料已使用云端存储"}</h2>
+          <p className="eyebrow">LOCAL MANAGEMENT</p>
+          <h2>{migrationPending ? "迁移本机已有活动" : "活动资料保存在本地管理环境"}</h2>
           <p>
             {migrationPending
               ? `检测到本机保存的 ${legacyEvents?.length ?? 0} 项活动。迁移前会自动下载一份完整备份；迁移完成后，本机旧数据仍会保留。`
-              : "活动文字资料存入数据库，海报和报名二维码存入图片空间，不再占用浏览器容量。"}
+              : "这里的修改只保存在当前电脑的开发数据库和图片空间，不会直接改变 GitHub Pages 上的官网。确认后再生成静态版本并发布。"}
           </p>
         </div>
         <div className="event-storage-actions">
@@ -552,7 +552,7 @@ export default function EventManager() {
               {editingEvent ? "保存修改" : "保存并加入日历"}
             </button>
             {formError ? <p role="alert">{formError}</p> : null}
-            {saved ? <span>活动信息已保存到云端。</span> : null}
+            {saved ? <span>活动信息已保存到本地管理环境。</span> : null}
           </div>
         </form>
       </section>
