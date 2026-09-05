@@ -136,19 +136,11 @@ export function SiteFooter() {
           <div className="footer-qr-grid">
             <figure>
               <img
-                alt="微信公众号北雍文化二维码"
+                alt="微信公众号北雍 ECC 二维码"
                 className="footer-qr-image"
                 src="/assets/qr-wechat-beiyong-culture.png"
               />
-              <figcaption>公众号（新）<br />北雍文化</figcaption>
-            </figure>
-            <figure>
-              <img
-                alt="微信公众号北雍文化商业智库二维码"
-                className="footer-qr-image"
-                src="/assets/qr-wechat-beiyong-thinktank.png"
-              />
-              <figcaption>公众号（旧）<br />北雍文化商业智库</figcaption>
+              <figcaption>公众号<br />北雍 ECC</figcaption>
             </figure>
             <figure>
               <img
