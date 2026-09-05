@@ -10,15 +10,10 @@ const localOrigin = `http://localhost:${port}`;
 const productionOrigin = "https://beiyongecc.org";
 const wrangler = join(root, "node_modules", "wrangler", "bin", "wrangler.js");
 
-const routes = [
+const baseRoutes = [
   "/",
   "/about",
   "/calendar",
-  "/calendar/local-1788515142947",
-  "/calendar/science-myth-uk-france-transition",
-  "/calendar/art-of-looking-online",
-  "/calendar/science-myth-france",
-  "/calendar/ai-industry-civilization-forum",
   "/join",
 ];
 
@@ -87,6 +82,17 @@ server.stderr.on("data", (chunk) => {
 
 try {
   await waitForServer();
+  const calendarResponse = await fetch(`${localOrigin}/api/calendar/events`, {
+    headers: { accept: "application/json" },
+  });
+  if (!calendarResponse.ok) {
+    throw new Error(`Could not read calendar routes: HTTP ${calendarResponse.status}`);
+  }
+  const calendarPayload = await calendarResponse.json();
+  const eventRoutes = Array.isArray(calendarPayload.events)
+    ? calendarPayload.events.map((event) => `/calendar/${encodeURIComponent(event.slug)}`)
+    : [];
+  const routes = [...baseRoutes, ...eventRoutes];
   let homeHtml = "";
   for (const route of routes) {
     const html = await exportRoute(route);

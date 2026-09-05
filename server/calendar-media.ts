@@ -77,12 +77,17 @@ export async function storeDataUrl(
   return storeCalendarImage(eventId, kind, bytes.buffer, match[1]);
 }
 
-export async function storeMigrationBackup(value: string) {
-  const key = `calendar-backups/legacy-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+export async function storeCalendarBackup(value: string, label = "backup") {
+  const safeLabel = safeSegment(label);
+  const key = `calendar-backups/${safeLabel}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
   await mediaBucket().put(key, value, {
     httpMetadata: { contentType: "application/json; charset=utf-8" },
   });
   return key;
+}
+
+export async function storeMigrationBackup(value: string) {
+  return storeCalendarBackup(value, "legacy");
 }
 
 export async function readCalendarMedia(key: string) {
@@ -92,4 +97,16 @@ export async function readCalendarMedia(key: string) {
 export async function removeCalendarMedia(value: string | undefined) {
   const key = mediaKeyFromUrl(value);
   if (key) await mediaBucket().delete(key);
+}
+
+export async function clearManagedCalendarMedia() {
+  const bucket = mediaBucket();
+  let cursor: string | undefined;
+  do {
+    const page = await bucket.list({ prefix: "calendar/", cursor });
+    if (page.objects.length) {
+      await bucket.delete(page.objects.map((object) => object.key));
+    }
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
 }

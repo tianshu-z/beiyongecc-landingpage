@@ -41,6 +41,7 @@ export type CalendarEvent = {
 // Static snapshot exported from the production calendar on 2026-09-05.
 // GitHub Pages reads this list directly; the local management page may overlay
 // it with records stored by the local development database.
+// <calendar-events>
 export const calendarEvents: CalendarEvent[] = [
   {
     id: "local-1788515142947",
@@ -180,6 +181,7 @@ export const calendarEvents: CalendarEvent[] = [
     demo: false,
   },
 ];
+// </calendar-events>
 
 export function getCalendarEvent(slug: string) {
   return calendarEvents.find((event) => event.slug === slug);

@@ -17,7 +17,7 @@ npm run dev
 - 北雍日历：`http://localhost:3000/calendar`
 - 本地活动管理：`http://localhost:3000/calendar/manage`
 
-本地管理页使用本机的开发数据库与图片空间，不会直接改动 GitHub Pages 上的公开数据。
+本地管理页使用本机的开发数据库与图片空间。编辑和保存只改变本地内容；点击“一键发布到官网”并再次确认后，才会更新 GitHub Pages。
 
 ## GitHub Pages 发布方式
 
@@ -40,9 +40,15 @@ npm run pages:build
 
 ## 更新活动的日常流程
 
-1. 在本地管理页新增或修改活动，确认页面效果。
-2. 将最终活动资料同步到 `shared/calendar.ts`，并将海报、二维码放入 `public/assets/calendar/`。
-3. 运行 `npm run pages:build` 做本地静态构建检查。
-4. 确认无误后再提交并推送到 GitHub；GitHub Actions 会更新公开网站。
+1. 运行 `npm run dev`，打开本地活动管理页面。
+2. 新增、修改或删除活动，并在本地日历确认效果。
+3. 点击“一键发布到官网”并确认。
+4. 本地发布服务会自动整理活动与图片、完成静态构建检查、提交到 GitHub，并等待 GitHub Pages 更新成功。
 
 这个流程刻意把“编辑”和“发布”分开，避免本地试改直接影响官网。
+
+如需让本地管理页完全恢复为当前代码中保存的官网活动快照，可运行：
+
+```bash
+npm run calendar:reset-local
+```

@@ -8,11 +8,16 @@ import {
   type CalendarEvent,
 } from "@/shared/calendar";
 import CalendarView from "../calendar-view";
-import { readLegacyMigrationEvents } from "../draft-storage";
 
 type CalendarApiPayload = {
   events: CalendarEvent[];
-  migrationCompleted: boolean;
+};
+
+type PublishPayload = {
+  ok?: boolean;
+  message?: string;
+  error?: string;
+  commitSha?: string;
 };
 
 function withChinaOffset(value: string) {
@@ -78,54 +83,26 @@ async function readApiPayload(response: Response) {
   return payload;
 }
 
-function downloadBackup(events: CalendarEvent[]) {
-  const backup = JSON.stringify(
-    { exportedAt: new Date().toISOString(), events },
-    null,
-    2,
-  );
-  const url = URL.createObjectURL(
-    new Blob([backup], { type: "application/json;charset=utf-8" }),
-  );
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `ecc-calendar-backup-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
-}
-
 export default function EventManager() {
   const [events, setEvents] = useState<CalendarEvent[]>(calendarEvents);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [formError, setFormError] = useState("");
-  const [legacyEvents, setLegacyEvents] = useState<CalendarEvent[] | null>(null);
-  const [migrationCompleted, setMigrationCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMigrating, setIsMigrating] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishMessage, setPublishMessage] = useState("");
 
   useEffect(() => {
-    const localEvents = readLegacyMigrationEvents();
     const controller = new AbortController();
 
     fetch("/api/calendar/events", { signal: controller.signal })
       .then(readApiPayload)
       .then((payload) => {
-        setLegacyEvents(localEvents);
-        setMigrationCompleted(payload.migrationCompleted);
-        setEvents(
-          localEvents?.length && !payload.migrationCompleted
-            ? localEvents
-            : payload.events,
-        );
+        setEvents(payload.events);
       })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setLegacyEvents(localEvents);
-        if (localEvents?.length) setEvents(localEvents);
         setFormError(error instanceof Error ? error.message : "暂时无法连接活动资料库。");
       })
       .finally(() => setIsLoading(false));
@@ -133,13 +110,7 @@ export default function EventManager() {
     return () => controller.abort();
   }, []);
 
-  const migrationPending = Boolean(legacyEvents?.length && !migrationCompleted);
-
   function startEditing(event: CalendarEvent) {
-    if (migrationPending) {
-      setFormError("请先迁移本机已有活动，再进行修改。");
-      return;
-    }
     setEditingEvent(event);
     setPosterPreview(event.cover);
     setSaved(false);
@@ -153,10 +124,6 @@ export default function EventManager() {
   }
 
   async function deleteEvent(event: CalendarEvent) {
-    if (migrationPending) {
-      setFormError("请先迁移本机已有活动，再进行删除操作。");
-      return;
-    }
     const confirmed = window.confirm(`确定删除“${event.title}”吗？`);
     if (!confirmed) return;
 
@@ -191,10 +158,6 @@ export default function EventManager() {
 
   async function submitEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (migrationPending) {
-      setFormError("请先完成上方的本机活动迁移，再保存修改。");
-      return;
-    }
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const id = editingEvent?.id ?? `local-${Date.now()}`;
@@ -297,93 +260,70 @@ export default function EventManager() {
     formElement.reset();
   }
 
-  async function migrateLegacyEvents() {
-    if (!legacyEvents?.length) return;
-    setIsMigrating(true);
+  async function publishWebsite() {
+    const confirmed = window.confirm(
+      "确定把当前本地活动发布到 beiyongecc.org 吗？发布后 GitHub Pages 会自动更新。",
+    );
+    if (!confirmed) return;
+
+    setIsPublishing(true);
+    setPublishMessage("正在整理活动与图片、检查网站并发布……");
     setFormError("");
     try {
-      downloadBackup(legacyEvents);
-    } catch {
-      // The server stores another full backup before migration, so a browser
-      // download restriction must not prevent the actual migration request.
-    }
-
-    try {
-      const response = await fetch("/api/calendar/migrate", {
+      const response = await fetch("http://127.0.0.1:4318/publish", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ events: legacyEvents }),
       });
-      const payload = await readApiPayload(response);
-      setEvents(payload.events);
-      setMigrationCompleted(true);
-      setSaved(true);
+      const payload = (await response.json()) as PublishPayload;
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "官网发布失败。");
+      }
+      setPublishMessage(payload.message || "已提交发布，GitHub Pages 正在更新。");
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "本机活动迁移失败。");
+      setPublishMessage("");
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : "无法连接本地发布服务，请重新运行 npm run dev。",
+      );
     } finally {
-      setIsMigrating(false);
+      setIsPublishing(false);
     }
   }
 
   return (
     <div className="event-manager">
-      <section className={`event-storage-status${migrationPending ? " is-pending" : " is-ready"}`}>
-        <div>
-          <p className="eyebrow">LOCAL MANAGEMENT</p>
-          <h2>{migrationPending ? "迁移本机已有活动" : "活动资料保存在本地管理环境"}</h2>
-          <p>
-            {migrationPending
-              ? `检测到本机保存的 ${legacyEvents?.length ?? 0} 项活动。迁移前会自动下载一份完整备份；迁移完成后，本机旧数据仍会保留。`
-              : "这里的修改只保存在当前电脑的开发数据库和图片空间，不会直接改变 GitHub Pages 上的官网。确认后再生成静态版本并发布。"}
-          </p>
-        </div>
-        <div className="event-storage-actions">
-          {legacyEvents?.length ? (
-            <button
-              className="button"
-              onClick={() => downloadBackup(legacyEvents)}
-              type="button"
-            >
-              下载本机备份
-            </button>
-          ) : null}
-          {migrationPending ? (
-            <button
-              className="button button-primary"
-              disabled={isMigrating}
-              onClick={migrateLegacyEvents}
-              type="button"
-            >
-              {isMigrating ? "正在安全迁移……" : "备份并迁移到云端"}
-            </button>
-          ) : null}
-        </div>
-        {formError && migrationPending ? (
-          <p className="event-storage-error" role="alert">{formError}</p>
-        ) : null}
-      </section>
-
       <section className="event-manager-calendar" aria-label="活动管理日历">
         <div className="event-manager-section-heading">
           <div>
             <p className="eyebrow">MANAGE EVENTS</p>
             <h2>选择需要操作的活动</h2>
           </div>
-          <button
-            className="button"
-            disabled={migrationPending || isLoading}
-            onClick={() => {
-              setEditingEvent(null);
-              setPosterPreview(null);
-              setSaved(false);
-              setFormError("");
-              document.getElementById("event-editor")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            type="button"
-          >
-            {isLoading ? "正在连接……" : "新建活动"}
-          </button>
+          <div className="event-manager-toolbar">
+            <button
+              className="button"
+              disabled={isLoading || isPublishing}
+              onClick={() => {
+                setEditingEvent(null);
+                setPosterPreview(null);
+                setSaved(false);
+                setFormError("");
+                document.getElementById("event-editor")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              type="button"
+            >
+              {isLoading ? "正在连接……" : "新建活动"}
+            </button>
+            <button
+              className="button button-primary"
+              disabled={isLoading || isPublishing}
+              onClick={publishWebsite}
+              type="button"
+            >
+              {isPublishing ? "正在发布……" : "一键发布到官网"}
+            </button>
+          </div>
         </div>
+        {publishMessage ? <p className="event-publish-status">{publishMessage}</p> : null}
         <CalendarView
           events={events}
           managementMode
@@ -546,7 +486,7 @@ export default function EventManager() {
           <div className="event-manager-actions event-manager-field-wide">
             <button
               className="button button-primary"
-              disabled={migrationPending || isLoading}
+              disabled={isLoading}
               type="submit"
             >
               {editingEvent ? "保存修改" : "保存并加入日历"}

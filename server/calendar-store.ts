@@ -217,3 +217,17 @@ export async function migrateCalendarEvents(events: CalendarEvent[]) {
   await db.batch(statements);
   return listCalendarEvents();
 }
+
+export async function resetCalendarEventsToBundled() {
+  await ensureCalendarSchema();
+  const db = database();
+  await db.batch([
+    db.prepare("DELETE FROM calendar_events"),
+    db.prepare("DELETE FROM calendar_event_deletions"),
+    db.prepare("DELETE FROM calendar_meta"),
+    db.prepare(`INSERT INTO calendar_meta (key, value, updated_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP)`)
+      .bind(migrationMetaKey, new Date().toISOString()),
+  ]);
+  return listCalendarEvents();
+}
