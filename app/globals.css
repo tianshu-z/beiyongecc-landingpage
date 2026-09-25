@@ -2510,8 +2510,12 @@ button {
 }
 
 .event-location-city {
-  color: var(--beiyong-red);
+  color: var(--ink);
   font-weight: 700;
+}
+
+.event-location-venue {
+  color: var(--muted);
 }
 
 .calendar-detail-link {

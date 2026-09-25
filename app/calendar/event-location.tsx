@@ -7,7 +7,7 @@ export default function EventLocation({ city, venue }: EventLocationProps) {
   return (
     <>
       {city ? <strong className="event-location-city">【{city}】</strong> : null}
-      {venue}
+      <span className="event-location-venue">{venue}</span>
     </>
   );
 }
