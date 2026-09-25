@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { findCalendarEventBySlug } from "@/server/calendar-store";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
+import EventLocation from "../event-location";
 import RegistrationActions from "../registration-actions";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,7 @@ export default async function CalendarEventPage({ params }: PageProps) {
               </div>
               <div>
                 <dt>地点</dt>
-                <dd>{event.city ? `${event.city} · ` : ""}{event.venue}</dd>
+                <dd><EventLocation city={event.city} venue={event.venue} /></dd>
               </div>
               {event.capacity !== undefined ? (
                 <div>

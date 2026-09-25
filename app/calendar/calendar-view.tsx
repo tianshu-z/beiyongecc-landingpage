@@ -8,6 +8,7 @@ import {
   type CalendarEvent,
   type EventCategory,
 } from "@/shared/calendar";
+import EventLocation from "./event-location";
 
 const weekDays = ["一", "二", "三", "四", "五", "六", "日"];
 const monthFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -254,8 +255,10 @@ export default function CalendarView({
                   <div>
                     <dt>地点</dt>
                     <dd>
-                      {selectedEvent.city ? `${selectedEvent.city} · ` : ""}
-                      {selectedEvent.venue}
+                      <EventLocation
+                        city={selectedEvent.city}
+                        venue={selectedEvent.venue}
+                      />
                     </dd>
                   </div>
                   <div>

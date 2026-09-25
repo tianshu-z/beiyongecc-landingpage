@@ -2509,6 +2509,11 @@ button {
   color: #938b7f;
 }
 
+.event-location-city {
+  color: var(--beiyong-red);
+  font-weight: 700;
+}
+
 .calendar-detail-link {
   width: fit-content;
 }

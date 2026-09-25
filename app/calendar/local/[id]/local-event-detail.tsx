@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { CalendarEvent } from "@/shared/calendar";
+import EventLocation from "../../event-location";
 import RegistrationActions from "../../registration-actions";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -86,7 +87,7 @@ export default function LocalEventDetail({ id }: { id: string }) {
             </div>
             <div>
               <dt>地点</dt>
-              <dd>{event.city ? `${event.city} · ` : ""}{event.venue}</dd>
+              <dd><EventLocation city={event.city} venue={event.venue} /></dd>
             </div>
             {event.capacity !== undefined ? (
               <div>
