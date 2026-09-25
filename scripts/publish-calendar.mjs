@@ -119,23 +119,11 @@ async function publishShareImage(cover, event, keepFiles) {
   const outputPath = join(publishedMediaDirectory, filename);
   await mkdir(publishedMediaDirectory, { recursive: true });
 
-  const foreground = await sharp(sourcePath)
-    .resize(1120, 570, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+  await sharp(sourcePath)
+    .resize(1200, 1200, {
+      fit: "cover",
+      position: "top",
     })
-    .png()
-    .toBuffer();
-
-  await sharp({
-    create: {
-      width: 1200,
-      height: 630,
-      channels: 4,
-      background: { r: 247, g: 243, b: 235, alpha: 1 },
-    },
-  })
-    .composite([{ input: foreground, gravity: "centre" }])
     .jpeg({ quality: 88, mozjpeg: true })
     .toFile(outputPath);
 

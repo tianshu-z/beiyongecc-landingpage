@@ -9,6 +9,8 @@ type PageMetadataOptions = {
   path: string;
   image: string;
   type?: "website" | "article";
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 function absoluteUrl(path: string) {
@@ -25,6 +27,8 @@ export function pageMetadata({
   path,
   image,
   type = "website",
+  imageWidth = 1200,
+  imageHeight = 630,
 }: PageMetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
   const socialImage = absoluteUrl(image);
@@ -43,8 +47,8 @@ export function pageMetadata({
       images: [
         {
           url: socialImage,
-          width: 1200,
-          height: 630,
+          width: imageWidth,
+          height: imageHeight,
           type: imageType(image),
           alt: title,
         },

@@ -39,6 +39,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     path: `/calendar/${event.slug}/`,
     image: event.shareImage ?? event.cover,
     type: "article",
+    imageWidth: 1200,
+    imageHeight: 1200,
   });
 }
 
