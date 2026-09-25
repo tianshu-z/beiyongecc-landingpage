@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/shared/site-metadata";
 import {
   audiences,
   collaborations,
@@ -9,11 +10,13 @@ import {
 } from "../content";
 import { PageHero, SiteFooter, SiteHeader } from "../site-chrome";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "关于北雍",
   description:
     "认识北雍文化商业智库的定位、核心文明问题、研究方向、方法与合作方式。",
-};
+  path: "/about/",
+  image: "/share/about.jpg",
+});
 
 export default function AboutPage() {
   return (

@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import sharp from "sharp";
 
 const execFileAsync = promisify(execFile);
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -110,18 +111,51 @@ async function publishMedia(value, event, kind, keepFiles) {
   return `/assets/calendar/published/${filename}`;
 }
 
+async function publishShareImage(cover, event, keepFiles) {
+  if (typeof cover !== "string" || !cover.startsWith("/")) return undefined;
+
+  const sourcePath = join(root, "public", cover.replace(/^\/+/, ""));
+  const filename = `${safeFileSegment(event.slug || event.id)}-share.jpg`;
+  const outputPath = join(publishedMediaDirectory, filename);
+  await mkdir(publishedMediaDirectory, { recursive: true });
+
+  const foreground = await sharp(sourcePath)
+    .resize(1120, 570, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+
+  await sharp({
+    create: {
+      width: 1200,
+      height: 630,
+      channels: 4,
+      background: { r: 247, g: 243, b: 235, alpha: 1 },
+    },
+  })
+    .composite([{ input: foreground, gravity: "centre" }])
+    .jpeg({ quality: 88, mozjpeg: true })
+    .toFile(outputPath);
+
+  keepFiles.add(filename);
+  return `/assets/calendar/published/${filename}`;
+}
+
 async function prepareStaticEvents(events) {
   const keepFiles = new Set();
   const result = [];
   for (const event of events) {
     const cover = await publishMedia(event.cover, event, "poster", keepFiles);
+    const shareImage = await publishShareImage(cover, event, keepFiles);
     const registrationQrCode = await publishMedia(
       event.registrationQrCode,
       event,
       "registration-qr",
       keepFiles,
     );
-    result.push({ ...event, cover, registrationQrCode });
+    result.push({ ...event, cover, shareImage, registrationQrCode });
   }
 
   await mkdir(publishedMediaDirectory, { recursive: true });
@@ -170,8 +204,8 @@ async function waitForGitHubPages(commitSha) {
   throw new Error("GitHub 已收到更新，但等待官网上线超时。请稍后刷新官网查看。");
 }
 
-export async function publishCalendar({ dryRun = false } = {}) {
-  if (!dryRun) await ensureCleanSourceTree();
+export async function publishCalendar({ dryRun = false, prepareOnly = false } = {}) {
+  if (!dryRun && !prepareOnly) await ensureCleanSourceTree();
   const originalSource = await readFile(calendarSourcePath, "utf8");
   const backupRoot = await mkdtemp(join(tmpdir(), "ecc-calendar-publish-"));
   const mediaBackup = join(backupRoot, "published");
@@ -194,6 +228,13 @@ export async function publishCalendar({ dryRun = false } = {}) {
         force: true,
       }).catch(() => undefined);
       return { ok: true, message: `已完成发布预检，共 ${events.length} 项活动。` };
+    }
+
+    if (prepareOnly) {
+      return {
+        ok: true,
+        message: `已在本地生成官网活动快照与分享图，共 ${events.length} 项活动。`,
+      };
     }
 
     await run("git", [
@@ -243,6 +284,9 @@ export async function publishCalendar({ dryRun = false } = {}) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const result = await publishCalendar({ dryRun: process.argv.includes("--dry-run") });
+  const result = await publishCalendar({
+    dryRun: process.argv.includes("--dry-run"),
+    prepareOnly: process.argv.includes("--prepare-only"),
+  });
   console.log(result.message);
 }

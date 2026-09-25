@@ -97,6 +97,7 @@ export function normalizeCalendarEvent(value: unknown): CalendarEvent {
       : [],
     audience: optionalString(input.audience) ?? "",
     cover: optionalString(input.cover) ?? "/assets/chinese-armillary-sphere-transparent.svg",
+    shareImage: optionalString(input.shareImage),
     priceType,
     priceCny: optionalNumber(input.priceCny),
     capacity: optionalNumber(input.capacity),

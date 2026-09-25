@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { findCalendarEventBySlug } from "@/server/calendar-store";
+import { pageMetadata } from "@/shared/site-metadata";
 import { SiteFooter, SiteHeader } from "../../site-chrome";
 import EventLocation from "../event-location";
 import RegistrationActions from "../registration-actions";
@@ -32,15 +33,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!event) return { title: "活动未找到" };
 
-  return {
-    title: `${event.title} · 北雍日历`,
+  return pageMetadata({
+    title: event.title,
     description: event.summary,
-    openGraph: {
-      title: event.title,
-      description: event.summary,
-      images: [{ url: event.cover }],
-    },
-  };
+    path: `/calendar/${event.slug}/`,
+    image: event.shareImage ?? event.cover,
+    type: "article",
+  });
 }
 
 function priceLabel(priceType: "free" | "paid" | "invitation", priceCny?: number) {

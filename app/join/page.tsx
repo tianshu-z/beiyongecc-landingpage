@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/shared/site-metadata";
 import { PageHero, SiteFooter, SiteHeader } from "../site-chrome";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "加入我们",
   description: "关注北雍、联系我们，或与北雍共同工作。",
-};
+  path: "/join/",
+  image: "/share/join.jpg",
+});
 
 export default function JoinPage() {
   return (

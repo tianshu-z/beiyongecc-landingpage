@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/shared/site-metadata";
 import { SectionLabel, SiteFooter, SiteHeader } from "./site-chrome";
+
+export const metadata: Metadata = pageMetadata({
+  title: "北雍文化商业智库",
+  description: "以历史为方法、以文明为尺度，以公共判断力与文明参与能力为目标的研究型智库。",
+  path: "/",
+  image: "/share/home.jpg",
+});
 
 const portals = [
   {

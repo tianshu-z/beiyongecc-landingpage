@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/shared/site-metadata";
 import { SiteFooter, SiteHeader } from "../site-chrome";
 import CalendarView from "./calendar-view";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "北雍日历 · ECC Calendar",
   description: "查看北雍的长风沙龙、长风论坛、课程与其他活动。",
-};
+  path: "/calendar/",
+  image: "/share/calendar.jpg",
+});
 
 export default function CalendarPage() {
   return (

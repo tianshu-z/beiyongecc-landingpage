@@ -28,6 +28,7 @@ export type CalendarEvent = {
   highlights: string[];
   audience: string;
   cover: string;
+  shareImage?: string;
   priceType: "free" | "paid" | "invitation";
   priceCny?: number;
   capacity?: number;
@@ -67,7 +68,8 @@ export const calendarEvents: CalendarEvent[] = [
     "registrationStatus": "open",
     "registrationUrl": "https://bvtqlziq.jsjform.com/f/y6TmhH",
     "registrationQrCode": "/assets/calendar/science-series-registration-qr.png",
-    "demo": false
+    "demo": false,
+    "shareImage": "/assets/calendar/published/local-1788515142947-share.jpg"
   },
   {
     "id": "evt-2026-09-26-art-of-looking",
@@ -99,7 +101,8 @@ export const calendarEvents: CalendarEvent[] = [
     "priceType": "invitation",
     "capacity": 10,
     "registrationStatus": "open",
-    "demo": false
+    "demo": false,
+    "shareImage": "/assets/calendar/published/art-of-looking-online-share.jpg"
   },
   {
     "id": "evt-2026-09-06-science-france",
@@ -129,7 +132,8 @@ export const calendarEvents: CalendarEvent[] = [
     "registrationStatus": "open",
     "registrationUrl": "https://bvtqlziq.jsjform.com/f/y6TmhH",
     "registrationQrCode": "/assets/calendar/science-series-registration-qr.png",
-    "demo": false
+    "demo": false,
+    "shareImage": "/assets/calendar/published/science-myth-france-share.jpg"
   },
   {
     "id": "evt-2026-09-20-ai-industry",
@@ -165,7 +169,8 @@ export const calendarEvents: CalendarEvent[] = [
     "registrationStatus": "coming-soon",
     "registrationUrl": "https://bvtqlziq.jsjform.com/f/i9Xf4T",
     "registrationQrCode": "/assets/calendar/ai-industry-forum-registration-qr.png",
-    "demo": false
+    "demo": false,
+    "shareImage": "/assets/calendar/published/ai-industry-civilization-forum-share.jpg"
   },
   {
     "id": "evt-2026-09-12-science-transition",
@@ -200,7 +205,8 @@ export const calendarEvents: CalendarEvent[] = [
     "capacity": 20,
     "registrationStatus": "open",
     "registrationQrCode": "/assets/calendar/published/science-myth-uk-france-transition-registration-qr.png",
-    "demo": false
+    "demo": false,
+    "shareImage": "/assets/calendar/published/science-myth-uk-france-transition-share.jpg"
   }
 ];
 // </calendar-events>
